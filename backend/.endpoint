@@ -1,0 +1,45 @@
+# Auth
+POST   /api/login
+POST   /api/logout
+GET    /api/me
+
+# Users
+GET    /api/users
+POST   /api/users
+
+GET    /api/users/{id}
+PUT    /api/users/{id}
+DELETE /api/users/{id}
+
+# Medicine
+GET    /api/medicines
+POST   /api/medicines
+
+GET    /api/medicines/{id}
+PUT    /api/medicines/{id}
+DELETE /api/medicines/{id}
+
+# Supplier
+GET    /api/suppliers
+POST   /api/suppliers
+
+PUT    /api/suppliers/{id}
+DELETE /api/suppliers/{id}
+
+# Transaction
+GET    /api/transactions
+POST   /api/transactions
+
+GET    /api/transactions/{id}
+
+# Payment
+POST /api/payments
+
+# Preorder
+GET  /api/pre-orders
+POST /api/pre-orders
+
+PUT  /api/pre-orders/{id}
+
+# Dashboard
+GET /api/dashboard

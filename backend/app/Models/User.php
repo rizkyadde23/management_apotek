@@ -22,6 +22,13 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+    protected $fillable = [
+            'role_id',
+            'name',
+            'email',
+            'password',
+            'is_active'
+    ];
     protected function casts(): array
     {
         return [
@@ -29,4 +36,38 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    
+    public function role(){
+        return $this->belongsTo(Role::class);
+    }
+
+    public function stockLogs()
+    {
+        return $this->hasMany(
+            StockLog::class
+        );
+    }
+
+    public function preOrders()
+    {
+        return $this->hasMany(
+            PreOrder::class
+        );
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(
+            Transaction::class
+        );
+    }
+    
+    public function notifications()
+    {
+        return $this->hasMany(
+            Notification::class
+        );
+    }
 }
+
+
