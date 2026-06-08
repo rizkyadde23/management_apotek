@@ -16,6 +16,9 @@ use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\PreOrderController;
 use App\Http\Controllers\Api\V1\PurchaseOrderController;
+use App\Http\Controllers\Api\V1\ExpiredMedicineAlertController;
+use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\ReportController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -260,5 +263,64 @@ Route::patch(
     '/purchase-orders/{purchaseOrder}/receive',
     [PurchaseOrderController::class, 'receive']
 );
+
+Route::patch(
+    '/purchase-orders/{purchaseOrder}/cancel',
+    [PurchaseOrderController::class, 'cancel']
+);
+
+/*
+|--------------------------------------------------------------------------
+| Sprint 5 - Expired Medicine Monitoring
+|--------------------------------------------------------------------------
+*/
+Route::middleware([
+    'auth:sanctum',
+    'role:ADMIN,OWNER,APOTEKER'
+])->group(function () {
+    Route::get('/expired-medicine-alerts', [ExpiredMedicineAlertController::class, 'index']);
+    Route::get('/expired-medicine-alerts/{expiredMedicineAlert}', [ExpiredMedicineAlertController::class, 'show']);
+    Route::get('/expired-medicine-alerts/status/{status}', [ExpiredMedicineAlertController::class, 'byStatus']);
+    Route::get('/expired-medicines/expiring/{daysRange}', [ExpiredMedicineAlertController::class, 'expiringMedicines']);
+    Route::post('/expired-medicine-alerts/generate', [ExpiredMedicineAlertController::class, 'generateAlerts']);
+    Route::patch('/expired-medicine-alerts/{expiredMedicineAlert}/acknowledge', [ExpiredMedicineAlertController::class, 'acknowledge']);
+    Route::patch('/expired-medicine-alerts/{expiredMedicineAlert}/resolve', [ExpiredMedicineAlertController::class, 'resolve']);
+    Route::patch('/expired-medicine-alerts/{expiredMedicineAlert}/dismiss', [ExpiredMedicineAlertController::class, 'dismiss']);
+    Route::delete('/expired-medicine-alerts/{expiredMedicineAlert}', [ExpiredMedicineAlertController::class, 'destroy']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Sprint 7 - Audit Log System
+|--------------------------------------------------------------------------
+*/
+Route::middleware([
+    'auth:sanctum',
+    'role:ADMIN,OWNER'
+])->group(function () {
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    Route::get('/audit-logs/{auditLog}', [AuditLogController::class, 'show']);
+    Route::get('/audit-logs/user/{userId}', [AuditLogController::class, 'byUser']);
+    Route::get('/audit-logs/action/{action}', [AuditLogController::class, 'byAction']);
+    Route::get('/audit-logs/module/{module}', [AuditLogController::class, 'byModule']);
+    Route::post('/audit-logs/filter', [AuditLogController::class, 'filter']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Sprint 8 - Reporting & Export
+|--------------------------------------------------------------------------
+*/
+Route::middleware([
+    'auth:sanctum',
+    'role:ADMIN,OWNER,APOTEKER'
+])->group(function () {
+    Route::get('/reports', [ReportController::class, 'index']);
+    Route::get('/reports/my-reports', [ReportController::class, 'myReports']);
+    Route::get('/reports/{report}', [ReportController::class, 'show']);
+    Route::post('/reports/generate', [ReportController::class, 'generate']);
+    Route::get('/reports/{report}/download', [ReportController::class, 'download']);
+    Route::delete('/reports/{report}', [ReportController::class, 'destroy']);
+});
 });
 
