@@ -58,4 +58,16 @@ class PurchaseOrderController extends BaseController
             'Barang berhasil diterima'
         );
     }
+
+    public function cancel(
+        PurchaseOrder $purchaseOrder
+    )
+    {
+        return $this->success(
+            $this->service->cancel(
+                $purchaseOrder
+            ),
+            'PO berhasil dibatalkan'
+        );
+    }
 }

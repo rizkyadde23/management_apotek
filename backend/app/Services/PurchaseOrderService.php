@@ -131,14 +131,36 @@ class PurchaseOrderService
                 'purchase_order_id',
                 $purchaseOrder->id
             )
-            ->where(
+            ->whereIn(
                 'status',
-                'PENDING'
+                ['PENDING', 'READY']
             )
             ->update([
-                'status' => 'READY'
+                'status' => 'COMPLETED'
             ]);
         });
+    }
+
+    public function cancel(
+        PurchaseOrder $purchaseOrder
+    )
+    {
+        DB::transaction(function () use ($purchaseOrder) {
+
+            $purchaseOrder->update([
+                'status' => 'CANCELLED'
+            ]);
+
+            PreOrder::where(
+                'purchase_order_id',
+                $purchaseOrder->id
+            )
+            ->update([
+                'status' => 'CANCELLED'
+            ]);
+        });
+
+        return $purchaseOrder;
     }
 
     private function generatePoNumber()
