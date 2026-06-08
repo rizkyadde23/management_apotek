@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\MedicineCategoryController;
 use App\Http\Controllers\Api\V1\SupplierController;
 use App\Http\Controllers\Api\V1\RoleController;
+use App\Http\Controllers\Api\V1\MedicineController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -111,6 +112,18 @@ Route::middleware([
     Route::apiResource(
         'suppliers',
         SupplierController::class
+    );
+
+});
+
+Route::middleware([
+    'auth:sanctum',
+    'role:ADMIN,OWNER,APOTEKER'
+])->group(function () {
+
+    Route::apiResource(
+        'medicines',
+        MedicineController::class
     );
 
 });
