@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Api\V1\AuthController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -57,3 +58,18 @@ Route::get('/notification-test', function () {
     )->get();
 
 });
+
+Route::post(
+        '/login',
+        [AuthController::class, 'login']
+);
+
+Route::middleware('auth:sanctum')
+        ->group(function () {
+            Route::post(
+                '/logout',
+                [AuthController::class, 'logout']
+            );
+            Route::get('/me',
+            [AuthController::class, 'me']);
+        });
