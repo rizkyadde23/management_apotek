@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\SupplierController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\MedicineController;
 use App\Http\Controllers\Api\V1\StockLogController;
+use App\Http\Controllers\Api\V1\LowStockController;
+use App\Http\Controllers\Api\V1\ExpiredMedicineController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -142,3 +144,33 @@ Route::post(
     [StockLogController::class, 'stockOut']
 );
 });
+
+Route::get(
+    '/low-stock',
+    [LowStockController::class, 'index']
+);
+
+Route::get(
+    '/out-of-stock',
+    [LowStockController::class, 'outOfStock']
+);
+
+Route::get(
+    '/low-stock-summary',
+    [LowStockController::class, 'summary']
+);
+
+Route::get(
+    '/expired-medicines',
+    [ExpiredMedicineController::class, 'expired']
+);
+
+Route::get(
+    '/expiring-soon',
+    [ExpiredMedicineController::class, 'expiringSoon']
+);
+
+Route::get(
+    '/expired-summary',
+    [ExpiredMedicineController::class, 'summary']
+);
