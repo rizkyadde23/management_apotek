@@ -2,6 +2,7 @@
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\UserController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -72,4 +73,8 @@ Route::middleware('auth:sanctum')
             );
             Route::get('/me',
             [AuthController::class, 'me']);
+            Route::apiResource(
+            'users',
+            UserController::class
+        );
         });
