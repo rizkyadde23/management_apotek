@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ExpiredMedicineController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\InvoiceController;
+use App\Http\Controllers\Api\V1\DashboardController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -207,4 +208,9 @@ Route::post(
 Route::get(
     '/transactions/{id}/invoice',
     [InvoiceController::class, 'show']
+);
+
+Route::get(
+    '/dashboard',
+    [DashboardController::class, 'index']
 );
