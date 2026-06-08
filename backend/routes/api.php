@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\LowStockController;
 use App\Http\Controllers\Api\V1\ExpiredMedicineController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\InvoiceController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -201,4 +202,9 @@ Route::middleware([
 Route::post(
     '/transactions/{transaction}/pay',
     [PaymentController::class, 'pay']
+);
+
+Route::get(
+    '/transactions/{id}/invoice',
+    [InvoiceController::class, 'show']
 );
