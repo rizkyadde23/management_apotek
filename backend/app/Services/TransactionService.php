@@ -78,7 +78,7 @@ class TransactionService
                 'subtotal' => $subtotal,
                 'discount' => $discount,
                 'total' => $total,
-                'payment_status' => 'PAID'
+                'payment_status' => 'UNPAID'
             ]);
 
             /*
