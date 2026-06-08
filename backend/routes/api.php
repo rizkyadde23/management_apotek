@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\V1\PurchaseOrderController;
 use App\Http\Controllers\Api\V1\ExpiredMedicineAlertController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\ReportController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\ChatController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -321,6 +323,42 @@ Route::middleware([
     Route::post('/reports/generate', [ReportController::class, 'generate']);
     Route::get('/reports/{report}/download', [ReportController::class, 'download']);
     Route::delete('/reports/{report}', [ReportController::class, 'destroy']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Sprint 7 - Notification System
+|--------------------------------------------------------------------------
+*/
+Route::middleware([
+    'auth:sanctum',
+    'role:ADMIN,OWNER,APOTEKER,KASIR,PELANGGAN'
+])->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::get('/notifications/{id}', [NotificationController::class, 'show']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+    Route::delete('/notifications/delete-all', [NotificationController::class, 'destroyAll']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Sprint 7 - Chat System
+|--------------------------------------------------------------------------
+*/
+Route::middleware([
+    'auth:sanctum',
+    'role:ADMIN,OWNER,APOTEKER,KASIR,PELANGGAN'
+])->group(function () {
+    Route::get('/chats', [ChatController::class, 'index']);
+    Route::post('/chats/with/{userId}', [ChatController::class, 'getOrCreate']);
+    Route::get('/chats/{chat}', [ChatController::class, 'show']);
+    Route::get('/chats/{chat}/messages', [ChatController::class, 'messages']);
+    Route::post('/chats/{chat}/messages', [ChatController::class, 'sendMessage']);
+    Route::delete('/chats/{chat}/messages/{chatMessage}', [ChatController::class, 'deleteMessage']);
+    Route::delete('/chats/{chat}', [ChatController::class, 'destroy']);
 });
 });
 
