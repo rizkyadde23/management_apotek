@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\MedicineCategoryController;
 use App\Http\Controllers\Api\V1\SupplierController;
 use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\MedicineController;
+use App\Http\Controllers\Api\V1\StockLogController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -126,4 +127,18 @@ Route::middleware([
         MedicineController::class
     );
 
+Route::get(
+    '/stock-movements',
+    [StockLogController::class, 'index']
+);
+
+Route::post(
+    '/medicines/{medicine}/stock-in',
+    [StockLogController::class, 'stockIn']
+);
+
+Route::post(
+    '/medicines/{medicine}/stock-out',
+    [StockLogController::class, 'stockOut']
+);
 });
