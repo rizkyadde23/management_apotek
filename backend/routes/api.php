@@ -65,7 +65,7 @@ Route::post(
         [AuthController::class, 'login']
 );
 
-Route::middleware('auth:sanctum')
+Route::middleware('auth:sanctum','role:ADMIN,OWNER')
         ->group(function () {
             Route::post(
                 '/logout',
@@ -77,4 +77,13 @@ Route::middleware('auth:sanctum')
             'users',
             UserController::class
         );
+        Route::get(
+    '/roles',
+    [RoleController::class, 'index']
+);
+
+Route::post(
+    '/roles',
+    [RoleController::class, 'store']
+);
         });
