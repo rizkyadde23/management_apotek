@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\MedicineController;
 use App\Http\Controllers\Api\V1\StockLogController;
 use App\Http\Controllers\Api\V1\LowStockController;
 use App\Http\Controllers\Api\V1\ExpiredMedicineController;
+use App\Http\Controllers\Api\V1\TransactionController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -174,3 +175,24 @@ Route::get(
     '/expired-summary',
     [ExpiredMedicineController::class, 'summary']
 );
+
+Route::middleware([
+    'auth:sanctum',
+    'role:ADMIN,APOTEKER,KASIR'
+])->group(function () {
+
+    Route::get(
+        '/transactions',
+        [TransactionController::class, 'index']
+    );
+
+    Route::get(
+        '/transactions/{id}',
+        [TransactionController::class, 'show']
+    );
+
+    Route::post(
+        '/transactions',
+        [TransactionController::class, 'store']
+    );
+});

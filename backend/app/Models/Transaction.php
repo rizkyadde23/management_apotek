@@ -44,4 +44,26 @@ class Transaction extends Model
             Payment::class
         );
     }
+
+    protected static function booted()
+{
+    static::creating(function ($transaction) {
+
+        $lastTransaction = static::latest('id')
+            ->first();
+
+        $nextNumber = $lastTransaction
+            ? $lastTransaction->id + 1
+            : 1;
+
+        $transaction->transaction_code =
+            'TRX-' .
+            str_pad(
+                $nextNumber,
+                6,
+                '0',
+                STR_PAD_LEFT
+            );
+    });
+}
 }
