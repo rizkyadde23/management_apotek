@@ -9,12 +9,12 @@ class PaymentSeeder extends Seeder
 {
     public function run(): void
     {
-        Payment::create([
-            'transaction_id' => 1,
-            'payment_method' => 'CASH',
-            'amount_paid' => 15000,
-            'change_amount' => 5000,
-            'paid_at' => now()
-        ]);
+        // Payment::create([
+        //     'transaction_id' => 1,
+        //     'payment_method' => 'CASH',
+        //     'amount_paid' => 15000,
+        //     'change_amount' => 5000,
+        //     'paid_at' => now()
+        // ]);
     }
 }

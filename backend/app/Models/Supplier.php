@@ -23,4 +23,11 @@ class Supplier extends Model
         Medicine::class
     );
 }
+
+public function purchaseOrders()
+{
+    return $this->hasMany(
+        PurchaseOrder::class
+    );
+}
 }

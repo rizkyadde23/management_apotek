@@ -3,26 +3,29 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PreOrder extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'medicine_id',
-        'user_id',
-        'customer_name',
-        'customer_phone',
-        'quantity',
-        'status',
-        'estimated_arrival_date',
-        'notes'
-    ];
 
-    protected $casts = [
-        'estimated_arrival_date' => 'date'
-    ];
+    'medicine_id',
+
+    'purchase_order_id',
+
+    'user_id',
+
+    'customer_name',
+
+    'customer_phone',
+
+    'quantity',
+
+    'status',
+
+    'estimated_arrival_date',
+
+    'notes'
+];
 
     public function medicine()
     {
@@ -37,4 +40,11 @@ class PreOrder extends Model
             User::class
         );
     }
+
+    public function purchaseOrder()
+{
+    return $this->belongsTo(
+        PurchaseOrder::class
+    );
+}
 }

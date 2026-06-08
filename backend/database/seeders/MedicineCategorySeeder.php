@@ -9,27 +9,27 @@ class MedicineCategorySeeder extends Seeder
 {
     public function run(): void
     {
-        MedicineCategory::insert([
-            [
-                'name' => 'Analgesik',
-                'description' => 'Obat pereda nyeri'
-            ],
-            [
-                'name' => 'Antibiotik',
-                'description' => 'Obat infeksi bakteri'
-            ],
-            [
-                'name' => 'Vitamin',
-                'description' => 'Suplemen vitamin'
-            ],
-            [
-                'name' => 'Antihistamin',
-                'description' => 'Obat alergi'
-            ],
-            [
-                'name' => 'Antasida',
-                'description' => 'Obat lambung'
-            ]
-        ]);
+        // MedicineCategory::insert([
+        //     [
+        //         'name' => 'Analgesik',
+        //         'description' => 'Obat pereda nyeri'
+        //     ],
+        //     [
+        //         'name' => 'Antibiotik',
+        //         'description' => 'Obat infeksi bakteri'
+        //     ],
+        //     [
+        //         'name' => 'Vitamin',
+        //         'description' => 'Suplemen vitamin'
+        //     ],
+        //     [
+        //         'name' => 'Antihistamin',
+        //         'description' => 'Obat alergi'
+        //     ],
+        //     [
+        //         'name' => 'Antasida',
+        //         'description' => 'Obat lambung'
+        //     ]
+        // ]);
     }
 }

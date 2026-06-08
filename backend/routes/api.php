@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\PreOrderController;
+use App\Http\Controllers\Api\V1\PurchaseOrderController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -198,9 +200,8 @@ Route::middleware([
         '/transactions',
         [TransactionController::class, 'store']
     );
-});
 
-Route::post(
+    Route::post(
     '/transactions/{transaction}/pay',
     [PaymentController::class, 'pay']
 );
@@ -214,3 +215,50 @@ Route::get(
     '/dashboard',
     [DashboardController::class, 'index']
 );
+
+Route::get(
+    '/pre-orders',
+    [PreOrderController::class, 'index']
+);
+
+Route::post(
+    '/pre-orders',
+    [PreOrderController::class, 'store']
+);
+
+Route::patch(
+    '/pre-orders/{preOrder}/ready',
+    [PreOrderController::class, 'ready']
+);
+
+Route::patch(
+    '/pre-orders/{preOrder}/complete',
+    [PreOrderController::class, 'complete']
+);
+
+Route::patch(
+    '/pre-orders/{preOrder}/cancel',
+    [PreOrderController::class, 'cancel']
+);
+
+Route::get(
+    '/purchase-orders',
+    [PurchaseOrderController::class, 'index']
+);
+
+Route::post(
+    '/purchase-orders',
+    [PurchaseOrderController::class, 'store']
+);
+
+Route::patch(
+    '/purchase-orders/{purchaseOrder}/approve',
+    [PurchaseOrderController::class, 'approve']
+);
+
+Route::patch(
+    '/purchase-orders/{purchaseOrder}/receive',
+    [PurchaseOrderController::class, 'receive']
+);
+});
+

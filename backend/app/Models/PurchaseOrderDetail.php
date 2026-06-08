@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class PurchaseOrderDetail extends Model
+{
+    protected $fillable = [
+
+    'purchase_order_id',
+
+    'medicine_id',
+
+    'quantity',
+
+    'unit_price',
+
+    'subtotal'
+];
+
+    public function purchaseOrder()
+    {
+        return $this->belongsTo(
+            PurchaseOrder::class
+        );
+    }
+
+    public function medicine()
+    {
+        return $this->belongsTo(
+            Medicine::class
+        );
+    }
+}

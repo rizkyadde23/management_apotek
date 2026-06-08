@@ -69,6 +69,14 @@ class User extends Authenticatable
             Notification::class
         );
     }
+
+    public function purchaseOrders()
+{
+    return $this->hasMany(
+        PurchaseOrder::class,
+        'created_by'
+    );
+}
 }
 
 
