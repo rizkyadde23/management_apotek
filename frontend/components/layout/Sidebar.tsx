@@ -15,6 +15,11 @@ const menus = [
   },
 
   {
+    label: "Kategori Obat",
+    href: "/categories",
+  },
+
+  {
     label: "Users",
     href: "/users",
   },
@@ -70,9 +75,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-slate-900 text-white min-h-screen">
-      <div className="p-6 text-xl font-bold">
-        Pharmacy App
-      </div>
+      <div className="p-6 text-xl font-bold">Pharmacy App</div>
 
       <nav className="space-y-2 px-3">
         {menus.map((menu) => (
@@ -80,9 +83,7 @@ export default function Sidebar() {
             key={menu.href}
             href={menu.href}
             className={`block px-4 py-3 rounded-lg ${
-              pathname === menu.href
-                ? "bg-blue-600"
-                : "hover:bg-slate-800"
+              pathname === menu.href ? "bg-blue-600" : "hover:bg-slate-800"
             }`}
           >
             {menu.label}
