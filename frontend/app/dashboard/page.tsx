@@ -1,79 +1,98 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+
+import StatCard from "@/components/dashboard/StatCard";
+import { getDashboard } from "@/lib/api/dashboard";
+
 import { DashboardData } from "@/types/dashboard";
 
 export default function DashboardPage() {
   const [data, setData] =
     useState<DashboardData | null>(null);
 
-  const fetchDashboard = async () => {
-    const response =
-      await api.get("/dashboard");
-
-    setData(response.data.data);
-  };
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
-    fetchDashboard();
+    loadDashboard();
   }, []);
 
+  async function loadDashboard() {
+    try {
+      const result =
+        await getDashboard();
+
+      setData(result);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="text-slate-700">
+        Loading dashboard...
+      </div>
+    );
+  }
+
   if (!data) {
-    return <div>Loading...</div>;
+    return (
+      <div className="text-red-500">
+        Dashboard gagal dimuat
+      </div>
+    );
   }
 
   return (
-    <div className="grid grid-cols-3 gap-5">
-      <Card
-        title="Total Medicines"
-        value={data.total_medicines}
-      />
+    <div>
+      <h1 className="text-3xl font-bold text-slate-900 mb-6">
+        Dashboard
+      </h1>
 
-      <Card
-        title="Suppliers"
-        value={data.total_suppliers}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+        <StatCard
+          title="Total Obat"
+          value={data.total_medicines}
+        />
 
-      <Card
-        title="Low Stock"
-        value={data.low_stock}
-      />
+        <StatCard
+          title="Total Supplier"
+          value={data.total_suppliers}
+        />
 
-      <Card
-        title="Expired"
-        value={data.expired_medicines}
-      />
+        <StatCard
+          title="Low Stock"
+          value={data.low_stock}
+        />
 
-      <Card
-        title="Today Revenue"
-        value={`Rp ${data.today_revenue}`}
-      />
+        <StatCard
+          title="Expired"
+          value={data.expired_medicines}
+        />
 
-      <Card
-        title="Month Revenue"
-        value={`Rp ${data.month_revenue}`}
-      />
-    </div>
-  );
-}
+        <StatCard
+          title="Transaksi Hari Ini"
+          value={data.today_transactions}
+        />
 
-function Card({
-  title,
-  value,
-}: {
-  title: string;
-  value: string | number;
-}) {
-  return (
-    <div className="bg-white p-5 rounded-xl shadow">
-      <p className="text-gray-500">
-        {title}
-      </p>
+        <StatCard
+          title="Pendapatan Hari Ini"
+          value={`Rp ${Number(
+            data.today_revenue
+          ).toLocaleString("id-ID")}`}
+        />
 
-      <h2 className="text-3xl font-bold mt-2">
-        {value}
-      </h2>
+        <StatCard
+          title="Pendapatan Bulan Ini"
+          value={`Rp ${Number(
+            data.month_revenue
+          ).toLocaleString("id-ID")}`}
+        />
+      </div>
     </div>
   );
 }

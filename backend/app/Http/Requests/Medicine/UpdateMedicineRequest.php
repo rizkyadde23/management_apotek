@@ -12,76 +12,68 @@ class UpdateMedicineRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array
-    {
-        return [
+ public function rules(): array
+{
+    return [
 
-            'category_id' => [
-                'required',
-                'exists:medicine_categories,id'
-            ],
+        'supplier_id' => [
+            'required',
+            'exists:suppliers,id'
+        ],
 
-            'supplier_id' => [
-                'required',
-                'exists:suppliers,id'
-            ],
+        'category_id' => [
+            'required',
+            'exists:medicine_categories,id'
+        ],
 
-            'code' => [
-                'required',
-                Rule::unique('medicines')
-                    ->ignore(
-                        $this->route('medicine')
-                    )
-            ],
+        'code' => [
+            'required',
+            Rule::unique('medicines')
+                ->ignore($this->route('medicine'))
+        ],
 
-            'name' => [
-                'required',
-                'max:255'
-            ],
+        'batch_number' => [
+            'required'
+        ],
 
-            'generic_name' => [
-                'nullable',
-                'max:255'
-            ],
+        'name' => [
+            'required'
+        ],
 
-            'unit' => [
-                'required',
-                'max:50'
-            ],
+        'description' => [
+            'nullable'
+        ],
 
-            'purchase_price' => [
-                'required',
-                'numeric',
-                'min:0'
-            ],
+        'type' => [
+            'required'
+        ],
 
-            'selling_price' => [
-                'required',
-                'numeric',
-                'gte:purchase_price'
-            ],
+        'stock' => [
+            'required',
+            'integer',
+            'min:0'
+        ],
 
-            'stock' => [
-                'required',
-                'integer',
-                'min:0'
-            ],
+        'minimum_stock' => [
+            'required',
+            'integer',
+            'min:1'
+        ],
 
-            'minimum_stock' => [
-                'required',
-                'integer',
-                'min:1'
-            ],
+        'price' => [
+            'required',
+            'numeric',
+            'min:0'
+        ],
 
-            'expired_date' => [
-                'required',
-                'date',
-                'after:today'
-            ],
+        'expired_date' => [
+            'required',
+            'date'
+        ],
 
-            'is_active' => [
-                'boolean'
-            ]
-        ];
-    }
+        'is_active' => [
+            'boolean'
+        ]
+    ];
+}
 }

@@ -8,23 +8,22 @@ use Illuminate\Foundation\Http\FormRequest;
 class StoreMedicineRequest extends FormRequest
 {
 
-    public function authorize(): bool
-    {
-        return false;
-    }
+public function authorize(): bool
+{
+    return true;
+}
 
-    public function rules(): array
+public function rules(): array
 {
     return [
+        'supplier_id' => [
+            'required',
+            'exists:suppliers,id'
+        ],
 
         'category_id' => [
             'required',
             'exists:medicine_categories,id'
-        ],
-
-        'supplier_id' => [
-            'required',
-            'exists:suppliers,id'
         ],
 
         'code' => [
@@ -32,24 +31,20 @@ class StoreMedicineRequest extends FormRequest
             'unique:medicines,code'
         ],
 
+        'batch_number' => [
+            'required'
+        ],
+
         'name' => [
             'required'
         ],
 
-        'unit' => [
+        'description' => [
+            'nullable'
+        ],
+
+        'type' => [
             'required'
-        ],
-
-        'purchase_price' => [
-            'required',
-            'numeric',
-            'min:0'
-        ],
-
-        'selling_price' => [
-            'required',
-            'numeric',
-            'gte:purchase_price'
         ],
 
         'stock' => [
@@ -64,10 +59,19 @@ class StoreMedicineRequest extends FormRequest
             'min:1'
         ],
 
+        'price' => [
+            'required',
+            'numeric',
+            'min:0'
+        ],
+
         'expired_date' => [
             'required',
-            'date',
-            'after:today'
+            'date'
+        ],
+
+        'is_active' => [
+            'boolean'
         ]
     ];
 }
