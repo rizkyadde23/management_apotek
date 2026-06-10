@@ -6,21 +6,14 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSupplierRequest extends FormRequest
+{public function authorize(): bool
 {
-    public function authorize(): bool
-    {
-        return false;
-    }
+    return true;
+}
 
-    public function rules(): array
+public function rules(): array
 {
     return [
-
-        'code' => [
-            'required',
-            'unique:suppliers,code'
-        ],
-
         'name' => [
             'required',
             'max:100'
@@ -34,6 +27,10 @@ class StoreSupplierRequest extends FormRequest
         'email' => [
             'nullable',
             'email'
+        ],
+
+        'address' => [
+            'nullable'
         ]
     ];
 }

@@ -7,38 +7,31 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateSupplierRequest extends FormRequest
+{public function authorize(): bool
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return false;
-    }
-
+    return true;
+}
 
 public function rules(): array
 {
     return [
-        'code' => [
-            'required',
-            Rule::unique('suppliers')
-                ->ignore(
-                    $this->route('supplier')
-                )
-        ],
-
         'name' => [
-            'required'
+            'required',
+            'max:100'
         ],
 
         'phone' => [
-            'nullable'
+            'nullable',
+            'max:20'
         ],
 
         'email' => [
             'nullable',
             'email'
+        ],
+
+        'address' => [
+            'nullable'
         ]
     ];
 }
