@@ -51,14 +51,11 @@ export default function MedicineFormModal({
 
   async function loadMasterData() {
     try {
-      const categoryRes =
-        await getCategories();
+      const categoryRes = await getCategories();
+      const supplierRes = await getSuppliers();
 
-      const supplierRes =
-        await getSuppliers();
-
-      setCategories(categoryRes.data.data);
-      setSuppliers(supplierRes.data.data);
+      setCategories(categoryRes);
+      setSuppliers(supplierRes);
     } catch (error) {
       console.error(error);
     }
@@ -66,10 +63,8 @@ export default function MedicineFormModal({
 
   function handleChange(
     e: React.ChangeEvent<
-      HTMLInputElement |
-      HTMLTextAreaElement |
-      HTMLSelectElement
-    >
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) {
     const { name, value } = e.target;
 
@@ -79,9 +74,7 @@ export default function MedicineFormModal({
     }));
   }
 
-  async function handleSubmit(
-    e: React.FormEvent
-  ) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     try {
@@ -101,19 +94,12 @@ export default function MedicineFormModal({
     <div className="fixed inset-0 bg-black/50 overflow-y-auto z-50">
       <div className="max-w-3xl mx-auto bg-white mt-10 rounded-xl p-6">
         <h2 className="text-2xl font-bold text-slate-900 mb-6">
-          {initialData
-            ? "Edit Obat"
-            : "Tambah Obat"}
+          {initialData ? "Edit Obat" : "Tambah Obat"}
         </h2>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-2 gap-4"
-        >
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block mb-1 text-slate-700">
-              Supplier
-            </label>
+            <label className="block mb-1 text-slate-700">Supplier</label>
 
             <select
               name="supplier_id"
@@ -121,15 +107,10 @@ export default function MedicineFormModal({
               onChange={handleChange}
               className="border rounded-lg p-2 w-full text-black"
             >
-              <option value="">
-                Pilih Supplier
-              </option>
+              <option value="">Pilih Supplier</option>
 
               {suppliers.map((item) => (
-                <option
-                  key={item.id}
-                  value={item.id}
-                >
+                <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
               ))}
@@ -137,9 +118,7 @@ export default function MedicineFormModal({
           </div>
 
           <div>
-            <label className="block mb-1 text-slate-700">
-              Kategori
-            </label>
+            <label className="block mb-1 text-slate-700">Kategori</label>
 
             <select
               name="category_id"
@@ -147,15 +126,10 @@ export default function MedicineFormModal({
               onChange={handleChange}
               className="border rounded-lg p-2 w-full text-black"
             >
-              <option value="">
-                Pilih Kategori
-              </option>
+              <option value="">Pilih Kategori</option>
 
               {categories.map((item) => (
-                <option
-                  key={item.id}
-                  value={item.id}
-                >
+                <option key={item.id} value={item.id}>
                   {item.name}
                 </option>
               ))}
@@ -192,13 +166,9 @@ export default function MedicineFormModal({
             onChange={handleChange}
             className="border rounded-lg p-2 text-black"
           >
-            <option value="GENERIC">
-              GENERIC
-            </option>
+            <option value="GENERIC">GENERIC</option>
 
-            <option value="NON_GENERIC">
-              NON GENERIC
-            </option>
+            <option value="NON_GENERIC">NON GENERIC</option>
           </select>
 
           <input
@@ -231,10 +201,7 @@ export default function MedicineFormModal({
           <input
             type="date"
             name="expired_date"
-            value={
-              form.expired_date
-                ?.split("T")[0]
-            }
+            value={form.expired_date?.split("T")[0]}
             onChange={handleChange}
             className="border rounded-lg p-2 text-black"
           />
@@ -261,9 +228,7 @@ export default function MedicineFormModal({
               disabled={loading}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg"
             >
-              {loading
-                ? "Menyimpan..."
-                : "Simpan"}
+              {loading ? "Menyimpan..." : "Simpan"}
             </button>
           </div>
         </form>

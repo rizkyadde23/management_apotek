@@ -10,23 +10,19 @@ import MedicineFormModal from "@/components/medicines/MedicineFormModal";
 import DeleteMedicineModal from "@/components/medicines/DeleteMedicineModal";
 
 export default function MedicinesPage() {
-  const [medicines, setMedicines] =
-    useState<Medicine[]>([]);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
-  const [openForm, setOpenForm] =
-    useState(false);
+  const [openForm, setOpenForm] = useState(false);
 
-  const [openDelete, setOpenDelete] =
-    useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
 
-  const [selectedMedicine, setSelectedMedicine] =
-    useState<Medicine | null>(null);
+  const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(
+    null,
+  );
 
   useEffect(() => {
     loadData();
@@ -36,12 +32,12 @@ export default function MedicinesPage() {
     try {
       setLoading(true);
 
-      const response =
-        await api.get("/medicines");
+      const response = await api.get("/medicines");
 
-      setMedicines(
-        response.data.data.data
-      );
+      console.log(response);
+      console.log(response.data);
+
+      setMedicines(response.data.data.data);
     } catch (error) {
       console.error(error);
     } finally {
@@ -49,14 +45,9 @@ export default function MedicinesPage() {
     }
   }
 
-  async function handleCreate(
-    formData: any
-  ) {
+  async function handleCreate(formData: any) {
     try {
-      await api.post(
-        "/medicines",
-        formData
-      );
+      await api.post("/medicines", formData);
 
       await loadData();
     } catch (error) {
@@ -65,16 +56,11 @@ export default function MedicinesPage() {
     }
   }
 
-  async function handleUpdate(
-    formData: any
-  ) {
+  async function handleUpdate(formData: any) {
     if (!selectedMedicine) return;
 
     try {
-      await api.put(
-        `/medicines/${selectedMedicine.id}`,
-        formData
-      );
+      await api.put(`/medicines/${selectedMedicine.id}`, formData);
 
       await loadData();
     } catch (error) {
@@ -87,9 +73,7 @@ export default function MedicinesPage() {
     if (!selectedMedicine) return;
 
     try {
-      await api.delete(
-        `/medicines/${selectedMedicine.id}`
-      );
+      await api.delete(`/medicines/${selectedMedicine.id}`);
 
       setOpenDelete(false);
 
@@ -100,27 +84,18 @@ export default function MedicinesPage() {
     }
   }
 
-  const filteredMedicines =
-    medicines.filter((medicine) =>
-      medicine.name
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
+  const filteredMedicines = medicines.filter((medicine) =>
+    medicine.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   if (loading) {
-    return (
-      <div className="p-6">
-        Loading...
-      </div>
-    );
+    return <div className="p-6">Loading...</div>;
   }
 
   return (
     <div className="space-y-5">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-slate-900">
-          Medicines
-        </h1>
+        <h1 className="text-3xl font-bold text-slate-900">Medicines</h1>
 
         <button
           onClick={() => {
@@ -137,9 +112,7 @@ export default function MedicinesPage() {
         type="text"
         placeholder="Cari obat..."
         value={search}
-        onChange={(e) =>
-          setSearch(e.target.value)
-        }
+        onChange={(e) => setSearch(e.target.value)}
         className="border rounded-lg p-2 w-full text-black"
       />
 
@@ -147,143 +120,81 @@ export default function MedicinesPage() {
         <table className="w-full">
           <thead>
             <tr className="bg-slate-100">
-              <th className="p-3 text-left">
-                Nama
-              </th>
+              <th className="p-3 text-left">Nama</th>
 
-              <th className="p-3 text-left">
-                Kategori
-              </th>
+              <th className="p-3 text-left">Kategori</th>
 
-              <th className="p-3 text-left">
-                Supplier
-              </th>
+              <th className="p-3 text-left">Supplier</th>
 
-              <th className="p-3 text-left">
-                Stock
-              </th>
+              <th className="p-3 text-left">Stock</th>
 
-              <th className="p-3 text-left">
-                Harga
-              </th>
+              <th className="p-3 text-left">Harga</th>
 
-              <th className="p-3 text-left">
-                Expired
-              </th>
+              <th className="p-3 text-left">Expired</th>
 
-              <th className="p-3 text-left">
-                Action
-              </th>
+              <th className="p-3 text-left">Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredMedicines.map(
-              (medicine) => (
-                <tr
-                  key={medicine.id}
-                  className="border-t"
-                >
-                  <td className="p-3">
-                    {medicine.name}
-                  </td>
+            {filteredMedicines.map((medicine) => (
+              <tr key={medicine.id} className="border-t">
+                <td className="p-3">{medicine.name}</td>
 
-                  <td className="p-3">
-                    {
-                      medicine.category
-                        ?.name
-                    }
-                  </td>
+                <td className="p-3">{medicine.category?.name}</td>
 
-                  <td className="p-3">
-                    {
-                      medicine.supplier
-                        ?.name
-                    }
-                  </td>
+                <td className="p-3">{medicine.supplier?.name}</td>
 
-                  <td className="p-3">
-                    {medicine.stock}
-                  </td>
+                <td className="p-3">{medicine.stock}</td>
 
-                  <td className="p-3">
-                    Rp{" "}
-                    {Number(
-                      medicine.price
-                    ).toLocaleString(
-                      "id-ID"
-                    )}
-                  </td>
+                <td className="p-3">
+                  Rp {Number(medicine.price).toLocaleString("id-ID")}
+                </td>
 
-                  <td className="p-3">
-                    {new Date(
-                      medicine.expired_date
-                    ).toLocaleDateString(
-                      "id-ID"
-                    )}
-                  </td>
+                <td className="p-3">
+                  {new Date(medicine.expired_date).toLocaleDateString("id-ID")}
+                </td>
 
-                  <td className="p-3">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedMedicine(
-                            medicine
-                          );
-                          setOpenForm(
-                            true
-                          );
-                        }}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded"
-                      >
-                        Edit
-                      </button>
+                <td className="p-3">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedMedicine(medicine);
+                        setOpenForm(true);
+                      }}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded"
+                    >
+                      Edit
+                    </button>
 
-                      <button
-                        onClick={() => {
-                          setSelectedMedicine(
-                            medicine
-                          );
-                          setOpenDelete(
-                            true
-                          );
-                        }}
-                        className="bg-red-600 text-white px-3 py-1 rounded"
-                      >
-                        Hapus
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            )}
+                    <button
+                      onClick={() => {
+                        setSelectedMedicine(medicine);
+                        setOpenDelete(true);
+                      }}
+                      className="bg-red-600 text-white px-3 py-1 rounded"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
       <MedicineFormModal
         open={openForm}
-        onClose={() =>
-          setOpenForm(false)
-        }
-        onSubmit={
-          selectedMedicine
-            ? handleUpdate
-            : handleCreate
-        }
-        initialData={
-          selectedMedicine || undefined
-        }
+        onClose={() => setOpenForm(false)}
+        onSubmit={selectedMedicine ? handleUpdate : handleCreate}
+        initialData={selectedMedicine || undefined}
       />
 
       <DeleteMedicineModal
         open={openDelete}
-        medicineName={
-          selectedMedicine?.name || ""
-        }
-        onClose={() =>
-          setOpenDelete(false)
-        }
+        medicineName={selectedMedicine?.name || ""}
+        onClose={() => setOpenDelete(false)}
         onConfirm={handleDelete}
       />
     </div>
