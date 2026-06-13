@@ -250,6 +250,11 @@ Route::get(
     [PurchaseOrderController::class, 'index']
 );
 
+Route::get(
+    '/purchase-orders/{purchaseOrder}',
+    [PurchaseOrderController::class, 'show']
+);
+
 Route::post(
     '/purchase-orders',
     [PurchaseOrderController::class, 'store']

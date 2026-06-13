@@ -70,4 +70,19 @@ class PurchaseOrderController extends BaseController
             'PO berhasil dibatalkan'
         );
     }
+
+    public function show(
+    PurchaseOrder $purchaseOrder
+    )
+    {
+        return $this->success(
+            $purchaseOrder->load([
+                'supplier',
+                'creator',
+                'details.medicine',
+                'preOrders'
+            ]),
+            'Detail PO berhasil diambil'
+        );
+    }
 }
