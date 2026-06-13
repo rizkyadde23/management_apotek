@@ -230,6 +230,21 @@ Route::post(
     [PreOrderController::class, 'store']
 );
 
+Route::get(
+    '/pre-orders/{preOrder}',
+    [PreOrderController::class, 'show']
+);
+
+Route::put(
+    '/pre-orders/{preOrder}',
+    [PreOrderController::class, 'update']
+);
+
+Route::delete(
+    '/pre-orders/{preOrder}',
+    [PreOrderController::class, 'destroy']
+);
+
 Route::patch(
     '/pre-orders/{preOrder}/ready',
     [PreOrderController::class, 'ready']

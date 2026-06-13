@@ -40,7 +40,7 @@ class PreOrderController extends BaseController
     )
     {
         return $this->success(
-            $this->service->markReady(
+            $this->service->ready(
                 $preOrder
             ),
             'Preorder siap diambil'
@@ -68,6 +68,44 @@ class PreOrderController extends BaseController
                 $preOrder
             ),
             'Preorder dibatalkan'
+        );
+    }
+
+        public function show(
+        PreOrder $preOrder
+    ) {
+        return $this->success(
+            $preOrder->load([
+                'medicine',
+                'user',
+                'purchaseOrder'
+            ]),
+            'Detail preorder berhasil diambil'
+        );
+    }
+
+    public function update(
+        UpdatePreOrderRequest $request,
+        PreOrder $preOrder
+    ) {
+        $preOrder->update(
+            $request->validated()
+        );
+
+        return $this->success(
+            $preOrder->fresh(),
+            'Preorder berhasil diperbarui'
+        );
+    }
+
+        public function destroy(
+        PreOrder $preOrder
+    ) {
+        $preOrder->delete();
+
+        return $this->success(
+            null,
+            'Preorder berhasil dihapus'
         );
     }
 }
