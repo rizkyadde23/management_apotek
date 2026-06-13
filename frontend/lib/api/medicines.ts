@@ -1,74 +1,31 @@
-const API_URL = "http://127.0.0.1:8000/api";
-
-function getHeaders() {
-  const token = localStorage.getItem("auth_token");
-
-  return {
-    Authorization: `Bearer ${token}`,
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  };
-}
+import { api } from "@/lib/api";
 
 export async function getMedicines(search = "") {
-  const response = await fetch(
-    `${API_URL}/medicines?search=${search}`,
-    {
-      headers: getHeaders(),
-    }
-  );
+  const response = await api.get(`/medicines?search=${search}`);
 
-  return response.json();
+  return response.data.data.data;
 }
 
 export async function getMedicine(id: number) {
-  const response = await fetch(
-    `${API_URL}/medicines/${id}`,
-    {
-      headers: getHeaders(),
-    }
-  );
+  const response = await api.get(`/medicines/${id}`);
 
-  return response.json();
+  return response.data.data;
 }
 
-export async function createMedicine(data: unknown) {
-  const response = await fetch(
-    `${API_URL}/medicines`,
-    {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(data),
-    }
-  );
+export async function createMedicine(data: any) {
+  const response = await api.post("/medicines", data);
 
-  return response.json();
+  return response.data;
 }
 
-export async function updateMedicine(
-  id: number,
-  data: unknown
-) {
-  const response = await fetch(
-    `${API_URL}/medicines/${id}`,
-    {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify(data),
-    }
-  );
+export async function updateMedicine(id: number, data: any) {
+  const response = await api.put(`/medicines/${id}`, data);
 
-  return response.json();
+  return response.data;
 }
 
 export async function deleteMedicine(id: number) {
-  const response = await fetch(
-    `${API_URL}/medicines/${id}`,
-    {
-      method: "DELETE",
-      headers: getHeaders(),
-    }
-  );
+  const response = await api.delete(`/medicines/${id}`);
 
-  return response.json();
+  return response.data;
 }

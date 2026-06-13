@@ -13,6 +13,10 @@ import PurchaseOrderDetailModal from "@/components/purchase-orders/PurchaseOrder
 
 import { PurchaseOrder } from "@/types/purchase-order";
 
+import PurchaseOrderFormModal from "@/components/purchase-orders/PurchaseOrderFormModal";
+
+import { createPurchaseOrder } from "@/lib/api/purchase-orders";
+
 export default function PurchaseOrdersPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
 
@@ -21,6 +25,8 @@ export default function PurchaseOrdersPage() {
   const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
 
   const [openDetail, setOpenDetail] = useState(false);
+
+  const [openForm, setOpenForm] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -33,6 +39,20 @@ export default function PurchaseOrdersPage() {
       setPurchaseOrders(data);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCreate(data: any) {
+    try {
+      await createPurchaseOrder(data);
+
+      setOpenForm(false);
+
+      await loadData();
+    } catch (error) {
+      console.error(error);
+
+      alert("Gagal membuat PO");
     }
   }
 
@@ -63,6 +83,13 @@ export default function PurchaseOrdersPage() {
   return (
     <div className="space-y-5">
       <h1 className="text-3xl font-bold text-black">Purchase Orders</h1>
+
+      <button
+        onClick={() => setOpenForm(true)}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        + Buat PO
+      </button>
 
       <div className="bg-white border rounded-lg overflow-hidden">
         <table className="w-full">
@@ -142,6 +169,11 @@ export default function PurchaseOrdersPage() {
         open={openDetail}
         onClose={() => setOpenDetail(false)}
         purchaseOrder={selectedPO}
+      />
+      <PurchaseOrderFormModal
+        open={openForm}
+        onClose={() => setOpenForm(false)}
+        onSubmit={handleCreate}
       />
     </div>
   );
