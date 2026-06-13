@@ -46,7 +46,7 @@ const menus = [
 
   {
     label: "Low Stock",
-    href: "/low-stock",
+    href: "/low-stocks",
   },
 
   {
