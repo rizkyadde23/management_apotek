@@ -50,6 +50,11 @@ const menus = [
   },
 
   {
+    label: "Stock Logs",
+    href: "/stock-logs",
+  },
+
+  {
     label: "Expired Medicines",
     href: "/expired-medicines",
   },
