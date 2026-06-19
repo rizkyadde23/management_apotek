@@ -60,16 +60,18 @@ class ReportController extends BaseController
     }
 
     public function download(Report $report)
-    {
-        if (!$report->file_path || !Storage::exists($report->file_path)) {
-            return $this->error(
-                'File laporan tidak ditemukan',
-                404
-            );
-        }
-
-        return Storage::download($report->file_path);
+{
+    if (!Storage::exists($report->file_path)) {
+        return response()->json([
+            'message' => 'File tidak ditemukan'
+        ], 404);
     }
+
+    return response()->download(
+    Storage::path($report->file_path),
+    basename($report->file_path)
+);
+}
 
     public function destroy(Report $report)
     {

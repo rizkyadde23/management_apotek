@@ -15,6 +15,7 @@ class Report extends Model
         'user_id',
         'type',
         'filters',
+        'format',
         'file_path',
         'generated_at'
     ];

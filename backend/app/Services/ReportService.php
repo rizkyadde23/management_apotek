@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Models\Report;
 use App\Repositories\ReportRepository;
 use Illuminate\Support\Facades\Storage;
+use App\Exports\MedicineExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportService
 {
@@ -32,28 +35,55 @@ class ReportService
         return $this->repository->getByType($type, $perPage);
     }
 
-    public function createReport($type, $format, $filters = [])
-    {
-        $report = $this->repository->create([
-            'user_id' => auth()->id(),
-            'type' => $type,
-            'filters' => $filters
-        ]);
+    public function createReport(
+    $type,
+    $format,
+    $filters = []
+)
+{
+    $report = $this->repository->create([
 
-        try {
-            $filePath = $this->generateReport($report, $format);
-            
-            $this->repository->update($report->id, [
+        'user_id' => auth()->id(),
+
+        'type' => $type,
+
+        'format' => $format,
+
+        'filters' => $filters
+
+    ]);
+
+    try {
+
+        $filePath = $this->generateReport(
+            $report,
+            $format
+        );
+
+        $this->repository->update(
+            $report->id,
+            [
+
                 'file_path' => $filePath,
-                'generated_at' => now()
-            ]);
 
-            return $this->repository->findById($report->id);
-        } catch (\Exception $e) {
-            $this->repository->delete($report->id);
-            throw $e;
-        }
+                'generated_at' => now()
+
+            ]
+        );
+
+        return $this->repository->findById(
+            $report->id
+        );
+
+    } catch (\Exception $e) {
+
+        $this->repository->delete(
+            $report->id
+        );
+
+        throw $e;
     }
+}
 
     private function generateReport($report, $format)
     {
@@ -75,18 +105,65 @@ class ReportService
         }
     }
 
-    private function generateMedicineReport($fileName, $format, $filters)
-    {
-        $data = [
-            'type' => 'Medicine Report',
-            'generated_at' => now(),
-            'note' => 'Implementation untuk export dengan maatwebsite/excel atau dompdf'
-        ];
+ private function generateMedicineReport(
+    $fileName,
+    $format,
+    $filters
+)
+{
+    $query = \App\Models\Medicine::with([
+        'supplier',
+        'category'
+    ]);
 
-        $filePath = "{$fileName}.{$format}";
-        Storage::put($filePath, json_encode($data));
+    if (!empty($filters['supplier_id'])) {
+
+        $query->where(
+            'supplier_id',
+            $filters['supplier_id']
+        );
+
+    }
+
+    if (!empty($filters['category_id'])) {
+
+        $query->where(
+            'category_id',
+            $filters['category_id']
+        );
+
+    }
+
+    $medicines = $query->get();
+
+    if ($format === 'excel') {
+
+        $filePath = "{$fileName}.xlsx";
+
+        Excel::store(
+            new \App\Exports\MedicineExport($filters),
+            $filePath
+        );
+
         return $filePath;
     }
+
+    $pdf = Pdf::loadView(
+        'reports.medicine',
+        [
+            'medicines' => $medicines
+        ]
+    );
+
+    $filePath = "{$fileName}.pdf";
+
+    Storage::put(
+        $filePath,
+        $pdf->output()
+    );
+
+    return $filePath;
+}
 
     private function generateSalesReport($fileName, $format, $filters)
     {
