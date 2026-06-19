@@ -343,18 +343,77 @@ class ReportService
     return $filePath;
 }
 
-    private function generateAuditLogReport($fileName, $format, $filters)
-    {
-        $data = [
-            'type' => 'Audit Log Report',
-            'generated_at' => now(),
-            'note' => 'Implementation untuk export dengan maatwebsite/excel atau dompdf'
-        ];
+    private function generateAuditLogReport(
+    $fileName,
+    $format,
+    $filters
+)
+{
+    $query = \App\Models\AuditLog::with(
+        'user'
+    );
 
-        $filePath = "{$fileName}.{$format}";
-        Storage::put($filePath, json_encode($data));
+    if (
+        !empty($filters['start_date']) &&
+        !empty($filters['end_date'])
+    ) {
+
+        $query->whereBetween(
+            'created_at',
+            [
+                $filters['start_date'],
+                $filters['end_date']
+            ]
+        );
+
+    }
+
+    if (!empty($filters['user_id'])) {
+
+        $query->where(
+            'user_id',
+            $filters['user_id']
+        );
+
+    }
+
+    $logs = $query
+        ->latest()
+        ->get();
+
+    if ($format === 'excel') {
+
+        $filePath = "{$fileName}.xlsx";
+
+        \Maatwebsite\Excel\Facades\Excel::store(
+
+            new \App\Exports\AuditLogExport(
+                $logs
+            ),
+
+            $filePath
+
+        );
+
         return $filePath;
     }
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        'reports.audit-log',
+        [
+            'logs' => $logs
+        ]
+    );
+
+    $filePath = "{$fileName}.pdf";
+
+    Storage::put(
+        $filePath,
+        $pdf->output()
+    );
+
+    return $filePath;
+}
 
     private function generatePurchaseOrderReport(
     $fileName,
