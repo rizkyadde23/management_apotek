@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Report;
+use App\Models\Transaction;
 use App\Repositories\ReportRepository;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\MedicineExport;
@@ -165,18 +166,120 @@ class ReportService
     return $filePath;
 }
 
-    private function generateSalesReport($fileName, $format, $filters)
-    {
-        $data = [
-            'type' => 'Sales Report',
-            'generated_at' => now(),
-            'note' => 'Implementation untuk export dengan maatwebsite/excel atau dompdf'
-        ];
+    private function generateSalesReport(
+    $fileName,
+    $format,
+    $filters
+) {
+    $query = Transaction::with([
+        'user',
+        'details.medicine'
+    ]);
 
-        $filePath = "{$fileName}.{$format}";
-        Storage::put($filePath, json_encode($data));
-        return $filePath;
+    /*
+    |--------------------------------------------------------------------------
+    | Filter Tanggal
+    |--------------------------------------------------------------------------
+    */
+
+    if (!empty($filters['start_date'])) {
+
+        $query->whereDate(
+            'created_at',
+            '>=',
+            $filters['start_date']
+        );
+
     }
+
+    if (!empty($filters['end_date'])) {
+
+        $query->whereDate(
+            'created_at',
+            '<=',
+            $filters['end_date']
+        );
+
+    }
+
+    $transactions = $query
+        ->latest()
+        ->get();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Summary
+    |--------------------------------------------------------------------------
+    */
+
+    $summary = [
+
+        'total_transactions' => $transactions->count(),
+
+        'total_sales' => $transactions->sum('total'),
+
+        'total_discount' => $transactions->sum('discount'),
+
+        'total_items' => $transactions
+            ->flatMap(function ($trx) {
+
+                return $trx->details;
+
+            })
+            ->sum('quantity'),
+
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Excel
+    |--------------------------------------------------------------------------
+    */
+
+    if ($format === 'excel') {
+
+        $filePath = "{$fileName}.xlsx";
+
+        Excel::store(
+            new \App\Exports\SalesExport(
+                $transactions,
+                $summary
+            ),
+            $filePath
+        );
+
+        return $filePath;
+
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PDF
+    |--------------------------------------------------------------------------
+    */
+
+    $pdf = Pdf::loadView(
+        'reports.sales',
+        [
+
+            'transactions' => $transactions,
+
+            'summary' => $summary,
+
+            'filters' => $filters
+
+        ]
+    );
+
+    $filePath = "{$fileName}.pdf";
+
+    Storage::put(
+        $filePath,
+        $pdf->output()
+    );
+
+    return $filePath;
+}
 
     private function generateStockReport($fileName, $format, $filters)
     {
