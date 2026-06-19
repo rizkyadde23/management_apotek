@@ -356,18 +356,84 @@ class ReportService
         return $filePath;
     }
 
-    private function generatePurchaseOrderReport($fileName, $format, $filters)
-    {
-        $data = [
-            'type' => 'Purchase Order Report',
-            'generated_at' => now(),
-            'note' => 'Implementation untuk export dengan maatwebsite/excel atau dompdf'
-        ];
+    private function generatePurchaseOrderReport(
+    $fileName,
+    $format,
+    $filters
+)
+{
+    $query = \App\Models\PurchaseOrder::with([
+        'supplier',
+        'creator'
+    ]);
 
-        $filePath = "{$fileName}.{$format}";
-        Storage::put($filePath, json_encode($data));
+    if (!empty($filters['supplier_id'])) {
+
+        $query->where(
+            'supplier_id',
+            $filters['supplier_id']
+        );
+
+    }
+
+    if (!empty($filters['status'])) {
+
+        $query->where(
+            'status',
+            $filters['status']
+        );
+
+    }
+
+    if (
+        !empty($filters['start_date']) &&
+        !empty($filters['end_date'])
+    ) {
+
+        $query->whereBetween(
+            'created_at',
+            [
+                $filters['start_date'],
+                $filters['end_date']
+            ]
+        );
+
+    }
+
+    $purchaseOrders = $query
+        ->latest()
+        ->get();
+
+    if ($format === 'excel') {
+
+        $filePath = "{$fileName}.xlsx";
+
+        \Maatwebsite\Excel\Facades\Excel::store(
+            new \App\Exports\PurchaseOrderExport(
+                $purchaseOrders
+            ),
+            $filePath
+        );
+
         return $filePath;
     }
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        'reports.purchase-order',
+        [
+            'purchaseOrders' => $purchaseOrders
+        ]
+    );
+
+    $filePath = "{$fileName}.pdf";
+
+    Storage::put(
+        $filePath,
+        $pdf->output()
+    );
+
+    return $filePath;
+}
 
     public function delete($id)
     {
