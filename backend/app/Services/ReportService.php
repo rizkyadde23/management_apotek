@@ -281,18 +281,67 @@ class ReportService
     return $filePath;
 }
 
-    private function generateStockReport($fileName, $format, $filters)
-    {
-        $data = [
-            'type' => 'Stock Report',
-            'generated_at' => now(),
-            'note' => 'Implementation untuk export dengan maatwebsite/excel atau dompdf'
-        ];
+    private function generateStockReport(
+    $fileName,
+    $format,
+    $filters
+)
+{
+    $query = \App\Models\Medicine::with([
+        'category',
+        'supplier'
+    ]);
 
-        $filePath = "{$fileName}.{$format}";
-        Storage::put($filePath, json_encode($data));
+    if (!empty($filters['category_id'])) {
+
+        $query->where(
+            'category_id',
+            $filters['category_id']
+        );
+
+    }
+
+    if (!empty($filters['supplier_id'])) {
+
+        $query->where(
+            'supplier_id',
+            $filters['supplier_id']
+        );
+
+    }
+
+    $medicines = $query->get();
+
+    if ($format === 'excel') {
+
+        $filePath = "{$fileName}.xlsx";
+
+        \Maatwebsite\Excel\Facades\Excel::store(
+            new \App\Exports\StockExport(
+                $medicines
+            ),
+            $filePath
+        );
+
         return $filePath;
     }
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        'reports.stock',
+        [
+            'medicines' => $medicines
+        ]
+    );
+
+    $filePath = "{$fileName}.pdf";
+
+    Storage::put(
+        $filePath,
+        $pdf->output()
+    );
+
+    return $filePath;
+}
 
     private function generateAuditLogReport($fileName, $format, $filters)
     {
