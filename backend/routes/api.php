@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\ExpiredMedicineAlertController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\NotificationSettingController;
 
 Route::get('/enum-test', function () {
     return UserRole::values();
@@ -363,3 +364,12 @@ Route::middleware([
 });
 });
 
+Route::get(
+    '/notification-settings',
+    [NotificationSettingController::class, 'show']
+);
+
+Route::put(
+    '/notification-settings',
+    [NotificationSettingController::class, 'update']
+);

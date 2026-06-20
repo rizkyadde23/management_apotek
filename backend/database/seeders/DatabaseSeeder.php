@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             PaymentSeeder::class,
             NotificationSeeder::class,
             PurchaseOrderSeeder::class,
+            NotificationSettingSeeder::class,
         ]);
         // User::factory()->create([
         //     'name' => 'Test User',

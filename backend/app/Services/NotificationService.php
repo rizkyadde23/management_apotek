@@ -103,27 +103,35 @@ class NotificationService
     /**
      * Create low stock notification
      */
-    public function sendLowStockAlert(
+   public function sendLowStockAlert(
         string $medicineName,
-        int $currentStock,
-        int $minStock
-    ): void {
+        int $currentStock
+    ): void
+    {
+        $threshold = \App\Models\NotificationSetting::first()?->low_stock_threshold ?? 10;
+
         $adminUsers = User::whereHas('role', function ($query) {
-            $query->whereIn('name', ['ADMIN', 'OWNER', 'APOTEKER']);
+            $query->whereIn('name', [
+                'ADMIN',
+                'OWNER',
+                'APOTEKER'
+            ]);
         })->get();
 
         foreach ($adminUsers as $user) {
+
             $this->send(
                 $user,
                 NotificationType::LOW_STOCK,
                 "Stok Menipis: {$medicineName}",
-                "Stok obat '{$medicineName}' tinggal {$currentStock} unit (minimal: {$minStock})",
+                "Stok obat '{$medicineName}' tinggal {$currentStock} unit (batas: {$threshold})",
                 [
                     'medicine_name' => $medicineName,
                     'current_stock' => $currentStock,
-                    'min_stock' => $minStock,
+                    'threshold' => $threshold,
                 ]
             );
+
         }
     }
 
