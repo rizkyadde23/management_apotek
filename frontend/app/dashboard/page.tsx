@@ -7,12 +7,18 @@ import { getDashboard } from "@/lib/api/dashboard";
 
 import { DashboardData } from "@/types/dashboard";
 
-export default function DashboardPage() {
-  const [data, setData] =
-    useState<DashboardData | null>(null);
+import SalesChart from "@/components/dashboard/SalesChart";
 
-  const [loading, setLoading] =
-    useState(true);
+import TopMedicineChart from "@/components/dashboard/TopMedicineChart";
+
+import StockChart from "@/components/dashboard/StockChart";
+
+import PaymentChart from "@/components/dashboard/PaymentChart";
+
+export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadDashboard();
@@ -20,8 +26,7 @@ export default function DashboardPage() {
 
   async function loadDashboard() {
     try {
-      const result =
-        await getDashboard();
+      const result = await getDashboard();
 
       setData(result);
     } catch (error) {
@@ -32,66 +37,50 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return (
-      <div className="text-slate-700">
-        Loading dashboard...
-      </div>
-    );
+    return <div className="text-slate-700">Loading dashboard...</div>;
   }
 
   if (!data) {
-    return (
-      <div className="text-red-500">
-        Dashboard gagal dimuat
-      </div>
-    );
+    return <div className="text-red-500">Dashboard gagal dimuat</div>;
   }
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-slate-900 mb-6">
-        Dashboard
-      </h1>
+      <h1 className="text-3xl font-bold text-slate-900 mb-6">Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        <StatCard
-          title="Total Obat"
-          value={data.total_medicines}
-        />
+        <StatCard title="Total Obat" value={data.cards.total_medicines} />
 
-        <StatCard
-          title="Total Supplier"
-          value={data.total_suppliers}
-        />
+        <StatCard title="Total Supplier" value={data.cards.total_suppliers} />
 
-        <StatCard
-          title="Low Stock"
-          value={data.low_stock}
-        />
+        <StatCard title="Low Stock" value={data.cards.low_stock} />
 
-        <StatCard
-          title="Expired"
-          value={data.expired_medicines}
-        />
+        <StatCard title="Expired" value={data.cards.expired_medicines} />
 
         <StatCard
           title="Transaksi Hari Ini"
-          value={data.today_transactions}
+          value={data.cards.today_transactions}
         />
 
         <StatCard
           title="Pendapatan Hari Ini"
-          value={`Rp ${Number(
-            data.today_revenue
-          ).toLocaleString("id-ID")}`}
+          value={`Rp ${Number(data.cards.today_revenue).toLocaleString(
+            "id-ID",
+          )}`}
         />
 
         <StatCard
           title="Pendapatan Bulan Ini"
-          value={`Rp ${Number(
-            data.month_revenue
-          ).toLocaleString("id-ID")}`}
+          value={`Rp ${Number(data.cards.month_revenue).toLocaleString(
+            "id-ID",
+          )}`}
         />
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
+        <SalesChart data={data.sales_chart} />
+        <TopMedicineChart data={data.top_medicines} />
+        <StockChart data={data.stock_chart} />
+        <PaymentChart data={data.payment_chart} />
       </div>
     </div>
   );

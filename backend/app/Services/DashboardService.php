@@ -18,33 +18,64 @@ class DashboardService
     {
         return [
 
-            'total_medicines' =>
+            /*
+            |--------------------------------------------------------------------------
+            | Summary Cards
+            |--------------------------------------------------------------------------
+            */
+
+            'cards' => [
+
+                'total_medicines' =>
+                    $this->dashboardRepository
+                        ->totalMedicines(),
+
+                'total_suppliers' =>
+                    $this->dashboardRepository
+                        ->totalSuppliers(),
+
+                'low_stock' =>
+                    $this->lowStockRepository
+                        ->countLowStock(),
+
+                'expired_medicines' =>
+                    $this->expiredRepository
+                        ->countExpired(),
+
+                'today_revenue' =>
+                    $this->dashboardRepository
+                        ->todayRevenue(),
+
+                'month_revenue' =>
+                    $this->dashboardRepository
+                        ->monthRevenue(),
+
+                'today_transactions' =>
+                    $this->dashboardRepository
+                        ->todayTransaction(),
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Analytics
+            |--------------------------------------------------------------------------
+            */
+
+            'sales_chart' =>
                 $this->dashboardRepository
-                    ->totalMedicines(),
+                    ->salesChart(),
 
-            'total_suppliers' =>
+            'top_medicines' =>
                 $this->dashboardRepository
-                    ->totalSuppliers(),
+                    ->topSellingMedicines(),
 
-            'low_stock' =>
-                $this->lowStockRepository
-                    ->countLowStock(),
-
-            'expired_medicines' =>
-                $this->expiredRepository
-                    ->countExpired(),
-
-            'today_revenue' =>
+            'stock_chart' =>
                 $this->dashboardRepository
-                    ->todayRevenue(),
+                    ->stockChart(),
 
-            'month_revenue' =>
+            'payment_chart' =>
                 $this->dashboardRepository
-                    ->monthRevenue(),
-
-            'today_transactions' =>
-                $this->dashboardRepository
-                    ->todayTransaction()
+                    ->paymentChart(),
         ];
     }
 }
