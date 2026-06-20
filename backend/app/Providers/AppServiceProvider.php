@@ -4,9 +4,16 @@ namespace App\Providers;
 
 use App\Models\Medicine;
 use App\Observers\MedicineObserver;
-use App\Models\Category;
-use App\Observers\CategoryObserver;
-
+use App\Models\Supplier;
+use App\Observers\SupplierObserver;
+use App\Models\User;
+use App\Observers\UserObserver;
+use App\Models\PurchaseOrder;
+use App\Observers\PurchaseOrderObserver;
+use App\Models\Transaction;
+use App\Observers\TransactionObserver;
+use App\Models\PreOrder;
+use App\Observers\PreOrderObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +32,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Medicine::observe(MedicineObserver::class);
-        Category::observe(CategoryObserver::class);
+        Supplier::observe(SupplierObserver::class);
+        User::observe(UserObserver::class);
+        PurchaseOrder::observe(PurchaseOrderObserver::class);
+        Transaction::observe(TransactionObserver::class);
+        PreOrder::observe(PreOrderObserver::class);
     }
 }
