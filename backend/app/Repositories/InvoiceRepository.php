@@ -6,13 +6,9 @@ use App\Models\Transaction;
 
 class InvoiceRepository
 {
-    public function findByTransaction(int $id)
+    public function getInvoiceData($id)
     {
-        return Transaction::with([
-            'user',
-            'details.medicine',
-            'payment'
-        ])
-        ->findOrFail($id);
+        // Pastikan relasi items, medicine, dan user ikut terambil
+        return Transaction::with(['items.medicine', 'user'])->findOrFail($id);
     }
 }

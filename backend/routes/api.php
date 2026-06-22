@@ -219,10 +219,6 @@ Route::middleware('role:ADMIN,OWNER,APOTEKER')->group(function () {
         [PaymentController::class, 'pay']
     );
     Route::get(
-        '/transactions/{id}/invoice',
-        [InvoiceController::class, 'show']
-    );
-    Route::get(
         '/pre-orders',
         [PreOrderController::class, 'index']
     );
@@ -344,3 +340,8 @@ Route::middleware('role:ADMIN,OWNER,APOTEKER')->group(function () {
     );
     });
 });
+
+    Route::get(
+            '/transactions/{transaction}/invoice',
+            [InvoiceController::class, 'print']
+        );

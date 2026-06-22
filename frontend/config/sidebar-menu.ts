@@ -38,6 +38,12 @@ export const sidebarSections: SidebarSection[] = [
         icon: LayoutDashboard,
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
+      {
+        label: "Kasir (POS)",
+        href: "/cashier",
+        icon: ShoppingCart, // Import dari lucide-react
+        roles: ["ADMIN", "OWNER", "APOTEKER"], // Hak akses menu kasir
+      },
     ],
   },
 

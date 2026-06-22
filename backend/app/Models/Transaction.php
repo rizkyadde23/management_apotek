@@ -66,4 +66,10 @@ class Transaction extends Model
             );
     });
 }
+
+public function items()
+    {
+        // Sesuaikan 'TransactionItem::class' dengan nama Model Detail Transaksi milikmu
+        return $this->hasMany(TransactionDetail::class, 'transaction_id');
+    }
 }
