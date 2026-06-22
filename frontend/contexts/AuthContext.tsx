@@ -4,28 +4,58 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
-interface User {
+export type RoleName =
+  | "ADMIN"
+  | "OWNER"
+  | "APOTEKER";
+
+interface Role {
+  id: number;
+  name: RoleName;
+}
+
+export interface User {
   id: number;
   name: string;
   email: string;
-  role?: {
-    id: number;
-    name: string;
-  };
+  role?: Role;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  role: RoleName | null;
+
   loading: boolean;
+
+  isAuthenticated: boolean;
+
+  isAdmin: boolean;
+  isOwner: boolean;
+  isApoteker: boolean;
+
   login: (
     token: string,
     user: User
   ) => void;
+
   logout: () => void;
+
+  refreshUser: (
+    user: User
+  ) => void;
+
+  hasRole: (
+    role: RoleName
+  ) => boolean;
+
+  hasAnyRole: (
+    roles: RoleName[]
+  ) => boolean;
 }
 
 const AuthContext =
@@ -38,6 +68,7 @@ export function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
+
   const [user, setUser] =
     useState<User | null>(null);
 
@@ -48,27 +79,36 @@ export function AuthProvider({
     useState(true);
 
   useEffect(() => {
+
     const savedToken =
-      localStorage.getItem("auth_token");
+      localStorage.getItem(
+        "auth_token"
+      );
 
     const savedUser =
-      localStorage.getItem("auth_user");
+      localStorage.getItem(
+        "auth_user"
+      );
 
     if (savedToken) {
       setToken(savedToken);
     }
 
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      setUser(
+        JSON.parse(savedUser)
+      );
     }
 
     setLoading(false);
+
   }, []);
 
   const login = (
     token: string,
     user: User
   ) => {
+
     localStorage.setItem(
       "auth_token",
       token
@@ -81,9 +121,11 @@ export function AuthProvider({
 
     setToken(token);
     setUser(user);
+
   };
 
   const logout = () => {
+
     localStorage.removeItem(
       "auth_token"
     );
@@ -92,21 +134,93 @@ export function AuthProvider({
       "auth_user"
     );
 
-    setUser(null);
     setToken(null);
+    setUser(null);
 
     window.location.href = "/login";
+
   };
+
+  const refreshUser = (
+    newUser: User
+  ) => {
+
+    setUser(newUser);
+
+    localStorage.setItem(
+      "auth_user",
+      JSON.stringify(newUser)
+    );
+
+  };
+
+  const role =
+    user?.role?.name ?? null;
+
+  const hasRole = (
+    roleName: RoleName
+  ) => {
+
+    return role === roleName;
+
+  };
+
+  const hasAnyRole = (
+    roles: RoleName[]
+  ) => {
+
+    return role
+      ? roles.includes(role)
+      : false;
+
+  };
+
+  const value =
+    useMemo(
+      () => ({
+
+        user,
+
+        token,
+
+        role,
+
+        loading,
+
+        isAuthenticated:
+          !!token,
+
+        isAdmin:
+          role === "ADMIN",
+
+        isOwner:
+          role === "OWNER",
+
+        isApoteker:
+          role === "APOTEKER",
+
+        login,
+
+        logout,
+
+        refreshUser,
+
+        hasRole,
+
+        hasAnyRole,
+
+      }),
+      [
+        user,
+        token,
+        role,
+        loading,
+      ]
+    );
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        token,
-        loading,
-        login,
-        logout,
-      }}
+      value={value}
     >
       {children}
     </AuthContext.Provider>

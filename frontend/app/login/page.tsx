@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,11 +29,7 @@ export default function LoginPage() {
 
       const token = response.data.data.token;
       const user = response.data.data.user;
-
-      localStorage.setItem("auth_token", token);
-
-      localStorage.setItem("auth_user", JSON.stringify(user));
-
+      login(token, user);
       router.push("/dashboard");
     } catch (err) {
       setError("Login gagal");

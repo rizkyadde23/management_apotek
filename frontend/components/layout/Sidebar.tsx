@@ -1,100 +1,64 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 
-const menus = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-  },
+import { useAuth } from "@/hooks/useAuth";
+import { sidebarSections } from "@/config/sidebar-menu";
 
-  {
-    label: "Medicines",
-    href: "/medicines",
-  },
-
-  {
-    label: "Kategori Obat",
-    href: "/categories",
-  },
-
-  {
-    label: "Users",
-    href: "/users",
-  },
-
-  {
-    label: "Suppliers",
-    href: "/suppliers",
-  },
-
-  {
-    label: "Transactions",
-    href: "/transactions",
-  },
-
-  {
-    label: "Purchase Orders",
-    href: "/purchase-orders",
-  },
-
-  {
-    label: "Pre Orders",
-    href: "/pre-orders",
-  },
-
-  {
-    label: "Low Stock",
-    href: "/low-stocks",
-  },
-
-  {
-    label: "Stock Logs",
-    href: "/stock-logs",
-  },
-
-  {
-    label: "Expired Medicines",
-    href: "/expired-medicines",
-  },
-
-  {
-    label: "Reports",
-    href: "/reports",
-  },
-
-  {
-    label: "Audit Logs",
-    href: "/audit-logs",
-  },
-
-  {
-    label: "Notifications",
-    href: "/notifications",
-  },
-];
+import SidebarHeader from "./sidebar/SidebarHeader";
+import SidebarSection from "./sidebar/SidebarSection";
 
 export default function Sidebar() {
-  const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
-    <aside className="w-64 bg-slate-900 text-white min-h-screen">
-      <div className="p-6 text-xl font-bold">Pharmacy App</div>
+    <aside className="flex h-screen w-72 flex-col border-r border-slate-800 bg-slate-900">
 
-      <nav className="space-y-2 px-3">
-        {menus.map((menu) => (
-          <Link
-            key={menu.href}
-            href={menu.href}
-            className={`block px-4 py-3 rounded-lg ${
-              pathname === menu.href ? "bg-blue-600" : "hover:bg-slate-800"
-            }`}
-          >
-            {menu.label}
-          </Link>
+      {/* Header */}
+      <SidebarHeader />
+
+      {/* Menu */}
+      <div className="flex-1 overflow-y-auto px-3 pb-4">
+
+        {sidebarSections.map((section) => (
+          <SidebarSection
+            key={section.title}
+            section={section}
+          />
         ))}
-      </nav>
+
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-slate-800 p-4">
+
+        <button
+          onClick={logout}
+          className="
+            flex
+            w-full
+            items-center
+            gap-3
+            rounded-xl
+            px-4
+            py-3
+            text-slate-300
+            transition-all
+            duration-200
+            hover:bg-red-500
+            hover:text-white
+          "
+        >
+          <LogOut size={20} />
+
+          <span className="font-medium">
+            Logout
+          </span>
+
+        </button>
+
+      </div>
+
     </aside>
   );
 }
