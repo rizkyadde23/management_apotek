@@ -78,7 +78,17 @@ export default function CategoriesPage() {
   }
 
   if (loading) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col">
+          <Navbar />
+
+          <div className="p-6">Loading Categories...</div>
+        </div>
+      </div>
+    );
   }
 
   return (

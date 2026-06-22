@@ -11,8 +11,18 @@ import {
 
 import { Supplier } from "@/types/supplier";
 
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+
+import PageHeader from "@/components/ui/PageHeader";
+import SearchBar from "@/components/ui/SearchBar";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+
+import SupplierTable from "@/components/suppliers/SupplierTable";
 import SupplierFormModal from "@/components/suppliers/SupplierFormModal";
 import DeleteSupplierModal from "@/components/suppliers/DeleteSupplierModal";
+
+import { Plus } from "lucide-react";
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -40,33 +50,50 @@ export default function SuppliersPage() {
       const data = await getSuppliers();
 
       setSuppliers(data);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
   async function handleCreate(formData: any) {
-    await createSupplier(formData);
+    try {
+      await createSupplier(formData);
 
-    await loadData();
+      await loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create supplier");
+    }
   }
 
   async function handleUpdate(formData: any) {
     if (!selectedSupplier) return;
 
-    await updateSupplier(selectedSupplier.id, formData);
+    try {
+      await updateSupplier(selectedSupplier.id, formData);
 
-    await loadData();
+      await loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update supplier");
+    }
   }
 
   async function handleDelete() {
     if (!selectedSupplier) return;
 
-    await deleteSupplier(selectedSupplier.id);
+    try {
+      await deleteSupplier(selectedSupplier.id);
 
-    setOpenDelete(false);
+      setOpenDelete(false);
 
-    await loadData();
+      await loadData();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete supplier");
+    }
   }
 
   const filteredSuppliers = suppliers.filter((supplier) =>
@@ -74,89 +101,67 @@ export default function SuppliersPage() {
   );
 
   if (loading) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col">
+          <Navbar />
+
+          <div className="p-6">Loading suppliers...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-slate-900">Suppliers</h1>
+    <div className="flex h-screen bg-slate-50">
+      {/* Sidebar */}
+      <Sidebar />
 
-        <button
-          onClick={() => {
-            setSelectedSupplier(null);
-            setOpenForm(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-        >
-          + Tambah Supplier
-        </button>
-      </div>
+      {/* Content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-      <input
-        type="text"
-        placeholder="Cari supplier..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="border rounded-lg p-2 w-full text-black"
-      />
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-6">
+            <PageHeader
+              title="Suppliers"
+              description="Manage supplier information and contact details."
+              action={
+                <PrimaryButton
+                  onClick={() => {
+                    setSelectedSupplier(null);
+                    setOpenForm(true);
+                  }}
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add Supplier
+                </PrimaryButton>
+              }
+            />
 
-      <div className="bg-white rounded-xl border overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 text-left">Nama</th>
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search supplier..."
+            />
 
-              <th className="p-3 text-left">Telepon</th>
+            <SupplierTable
+              suppliers={filteredSuppliers}
+              onEdit={(supplier) => {
+                setSelectedSupplier(supplier);
 
-              <th className="p-3 text-left">Email</th>
+                setOpenForm(true);
+              }}
+              onDelete={(supplier) => {
+                setSelectedSupplier(supplier);
 
-              <th className="p-3 text-left">Alamat</th>
-
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredSuppliers.map((supplier) => (
-              <tr key={supplier.id} className="border-t">
-                <td className="p-3 text-black">{supplier.name}</td>
-
-                <td className="p-3 text-black">{supplier.phone}</td>
-
-                <td className="p-3 text-black">{supplier.email}</td>
-
-                <td className="p-3 text-black">{supplier.address}</td>
-
-                <td className="p-3">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedSupplier(supplier);
-
-                        setOpenForm(true);
-                      }}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setSelectedSupplier(supplier);
-
-                        setOpenDelete(true);
-                      }}
-                      className="bg-red-600 text-white px-3 py-1 rounded"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                setOpenDelete(true);
+              }}
+            />
+          </div>
+        </main>
       </div>
 
       <SupplierFormModal

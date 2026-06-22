@@ -45,7 +45,7 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return <div className="text-slate-700">Loading dashboard...</div>;
+    return <div className="text-slate-700">Loading Dashboard...</div>;
   }
 
   if (!data) {
@@ -54,9 +54,9 @@ export default function DashboardPage() {
 
   return (
     <div>
-        <div className="mb-8">
-          <RecentNotificationTable data={data.recent_notifications} />
-        </div>
+      <div className="mb-8">
+        <RecentNotificationTable data={data.recent_notifications} />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         <StatCard title="Total Obat" value={data.cards.total_medicines} />
 
