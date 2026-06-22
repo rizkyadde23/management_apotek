@@ -17,6 +17,16 @@ import PurchaseOrderFormModal from "@/components/purchase-orders/PurchaseOrderFo
 
 import { createPurchaseOrder } from "@/lib/api/purchase-orders";
 
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import PageHeader from "@/components/ui/PageHeader";
+import SearchBar from "@/components/ui/SearchBar";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import PurchaseOrderStats from "@/components/purchase-orders/PurchaseOrderStats";
+import PurchaseOrderTable from "@/components/purchase-orders/PurchaseOrderTable";
+
+import { Plus } from "lucide-react";
+
 export default function PurchaseOrdersPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
 
@@ -27,6 +37,14 @@ export default function PurchaseOrdersPage() {
   const [openDetail, setOpenDetail] = useState(false);
 
   const [openForm, setOpenForm] = useState(false);
+
+  const [search, setSearch] = useState("");
+
+  const filteredPurchaseOrders = purchaseOrders.filter(
+    (po) =>
+      po.po_number.toLowerCase().includes(search.toLowerCase()) ||
+      po.supplier?.name?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   useEffect(() => {
     loadData();
@@ -77,104 +95,72 @@ export default function PurchaseOrdersPage() {
   }
 
   if (loading) {
-    return <div className="p-5">Loading...</div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col">
+          <Navbar />
+
+          <div className="p-6">Loading Medicines...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-3xl font-bold text-black">Purchase Orders</h1>
+    <div className="flex h-screen bg-slate-100">
+      <Sidebar />
 
-      <button
-        onClick={() => setOpenForm(true)}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        + Buat PO
-      </button>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 border">No PO</th>
+        <main className="flex-1 overflow-y-auto p-8">
+          <div className="space-y-6">
+            <PageHeader
+              title="Purchase Orders"
+              description="Manage medicine purchase orders from suppliers."
+              action={
+                <PrimaryButton onClick={() => setOpenForm(true)}>
+                  <Plus size={18} className="mr-2" />
+                  Create PO
+                </PrimaryButton>
+              }
+            />
 
-              <th className="p-3 border">Supplier</th>
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search purchase order..."
+            />
 
-              <th className="p-3 border">Status</th>
+            <PurchaseOrderStats purchaseOrders={filteredPurchaseOrders} />
 
-              <th className="p-3 border">Dibuat Oleh</th>
+            <PurchaseOrderTable
+              purchaseOrders={filteredPurchaseOrders}
+              onDetail={(po) => {
+                setSelectedPO(po);
+                setOpenDetail(true);
+              }}
+              onApprove={handleApprove}
+              onReceive={handleReceive}
+              onCancel={handleCancel}
+            />
+          </div>
+        </main>
 
-              <th className="p-3 border">Aksi</th>
-            </tr>
-          </thead>
+        <PurchaseOrderDetailModal
+          open={openDetail}
+          onClose={() => setOpenDetail(false)}
+          purchaseOrder={selectedPO}
+        />
 
-          <tbody>
-            {purchaseOrders.map((po) => (
-              <tr key={po.id}>
-                <td className="border p-3 text-black">{po.po_number}</td>
-
-                <td className="border p-3 text-black">{po.supplier?.name}</td>
-
-                <td className="border p-3 text-black">{po.status}</td>
-
-                <td className="border p-3 text-black">{po.creator?.name}</td>
-
-                <td className="border p-3">
-                  <div className="flex gap-2 flex-wrap">
-                    <button
-                      onClick={() => {
-                        setSelectedPO(po);
-
-                        setOpenDetail(true);
-                      }}
-                      className="bg-blue-600 text-white px-3 py-1 rounded"
-                    >
-                      Detail
-                    </button>
-
-                    {po.status === "PENDING" && (
-                      <>
-                        <button
-                          onClick={() => handleApprove(po.id)}
-                          className="bg-green-600 text-white px-3 py-1 rounded"
-                        >
-                          Approve
-                        </button>
-
-                        <button
-                          onClick={() => handleCancel(po.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    )}
-
-                    {po.status === "APPROVED" && (
-                      <button
-                        onClick={() => handleReceive(po.id)}
-                        className="bg-purple-600 text-white px-3 py-1 rounded"
-                      >
-                        Receive
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <PurchaseOrderFormModal
+          open={openForm}
+          onClose={() => setOpenForm(false)}
+          onSubmit={handleCreate}
+        />
       </div>
-
-      <PurchaseOrderDetailModal
-        open={openDetail}
-        onClose={() => setOpenDetail(false)}
-        purchaseOrder={selectedPO}
-      />
-      <PurchaseOrderFormModal
-        open={openForm}
-        onClose={() => setOpenForm(false)}
-        onSubmit={handleCreate}
-      />
     </div>
   );
 }
