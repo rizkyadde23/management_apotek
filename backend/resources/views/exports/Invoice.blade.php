@@ -153,14 +153,5 @@
         <p>Semoga Lekas Sembuh & Sehat Selalu</p>
         <p style="margin-top: 5px; font-size: 8px; color: #666;">Struk dicetak otomatis oleh Sistem Apotek</p>
     </div>
-
-    <!-- TRIGGER AUTOMATIC PRINT -->
-    <script>
-        window.onload = function() {
-            window.print();
-            // Opsional: Tutup tab otomatis setelah selesai print/cancel
-            // window.onafterprint = function() { window.close(); }
-        }
-    </script>
 </body>
 </html>

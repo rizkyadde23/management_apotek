@@ -6,9 +6,10 @@ use App\Models\Transaction;
 
 class InvoiceRepository
 {
-    public function getInvoiceData($id)
+    public function getInvoiceData($transaction_id)
     {
-        // Pastikan relasi items, medicine, dan user ikut terambil
-        return Transaction::with(['items.medicine', 'user'])->findOrFail($id);
+        // Ganti 'medicines' menjadi 'items.medicine' dan 'user'
+        // Ini memastikan tabel pivot/item dan nama kasir ikut terbawa ke Blade
+        return Transaction::with(['items.medicine', 'user'])->findOrFail($transaction_id);
     }
 }

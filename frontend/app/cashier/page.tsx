@@ -29,6 +29,7 @@ interface Medicine {
         name: string;
       }
     | string;
+  expired_date?: string;
 }
 
 interface CartItem {
@@ -59,13 +60,13 @@ export default function KasirPage() {
   const fetchMedicines = async () => {
     setIsLoadingMedicines(true);
     try {
-      const token = localStorage.getItem("token");
+      // 🌟 PERBAIKAN KUNCI: Samakan key localStorage menjadi "auth_token"
+      const token = localStorage.getItem("auth_token");
 
       const response = await api.get("/medicines", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log(response.data.data.data);
       setMedicines(response.data.data.data);
     } catch (error) {
       console.error("Gagal mengambil data obat:", error);
@@ -197,9 +198,7 @@ export default function KasirPage() {
 
     setIsSubmitting(true);
 
-    // 1. Ambil token di awal dan simpan ke variabel lokal agar aman
     const savedToken = localStorage.getItem("auth_token");
-    console.log("Token terdeteksi sebelum transaksi mulai:", savedToken);
 
     if (!savedToken) {
       alert("Sesi Anda habis atau token hilang. Silakan login kembali.");
@@ -222,7 +221,7 @@ export default function KasirPage() {
         "/transactions",
         transactionPayload,
         {
-          headers: { Authorization: `Bearer ${savedToken}` }, // Gunakan variabel lokal savedToken
+          headers: { Authorization: `Bearer ${savedToken}` },
         },
       );
 
@@ -243,23 +242,41 @@ export default function KasirPage() {
       };
 
       await api.post(`/transactions/${transactionId}/pay`, paymentPayload, {
-        headers: { Authorization: `Bearer ${savedToken}` }, // Gunakan variabel lokal savedToken
+        headers: { Authorization: `Bearer ${savedToken}` },
       });
 
       alert("Transaksi & Pembayaran Sukses Dikonfirmasi!");
 
       // -------------------------------------------------------
-      // TAHAP C: Cetak Struk Menggunakan Window Open + Token URL
+      // TAHAP C: Cetak Struk Menggunakan Axios (Response Type 'Blob')
       // -------------------------------------------------------
-      // Di sini kita kirim variabel savedToken yang dijamin nilainya masih ada
-      const baseURL = api.defaults.baseURL || "http://localhost:8000/api";
-      window.open(
-        `${baseURL}/transactions/${transactionId}/invoice?token=${encodeURIComponent(savedToken)}`,
-        "_blank",
-      );
+      try {
+        const response = await api.get(
+          `/transactions/${transactionId}/invoice`,
+          {
+            responseType: "blob",
+            headers: { Authorization: `Bearer ${savedToken}` }, // Proteksi header aman terkendali
+          },
+        );
+
+        const fileBlob = new Blob([response.data], { type: "application/pdf" });
+        const pdfUrl = URL.createObjectURL(fileBlob);
+
+        const cetakWindow = window.open(pdfUrl, "_blank");
+
+        if (cetakWindow) {
+          cetakWindow.onload = () => {
+            cetakWindow.print();
+            URL.revokeObjectURL(pdfUrl);
+          };
+        }
+      } catch (error: any) {
+        console.error("Gagal mencetak struk:", error);
+        alert("Transaksi sukses, tetapi gagal memuat lembar PDF cetak struk.");
+      }
 
       // -------------------------------------------------------
-      // TAHAP D: Reset State Form (HATI-HATI JANGAN HAPUS TOKEN!)
+      // TAHAP D: Reset State Form
       // -------------------------------------------------------
       setCart([]);
       setPaymentAmount("");
@@ -276,49 +293,57 @@ export default function KasirPage() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
       <Sidebar />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar />
 
-        <main className="flex flex-1 flex-col overflow-hidden p-8">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+        <main className="flex flex-1 flex-col p-5 overflow-hidden">
+          <div className="mb-3 flex-shrink-0">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
               Kasir Apotek
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-xs text-slate-500">
               Eksekusi transaksi obat aman terkendali oleh Apoteker.
             </p>
           </div>
 
-          <div className="flex flex-1 gap-6 overflow-hidden">
-            {/* KATALOG OBAT */}
-            <div className="flex flex-1 flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm overflow-hidden">
-              <SearchBar
-                value={search}
-                onChange={setSearch}
-                placeholder="Cari obat berdasarkan nama produk atau kategori..."
-              />
+          <div className="grid grid-cols-12 gap-4 flex-1 min-h-0 w-full overflow-hidden">
+            {/* 1. KATALOG OBAT */}
+            <div className="col-span-8 flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm overflow-hidden h-full">
+              <div className="flex-shrink-0 mb-3">
+                <SearchBar
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Cari obat berdasarkan nama produk atau kategori..."
+                />
+              </div>
 
-              <div className="flex-1 overflow-y-auto pr-2">
+              <div className="flex-1 overflow-y-auto pr-1 min-h-0">
                 {isLoadingMedicines ? (
-                  <div className="flex h-full flex-col items-center justify-center text-slate-400 gap-2">
-                    <Loader2 className="animate-spin text-blue-600" size={28} />
-                    <p className="text-sm">Menghubungkan ke server apotek...</p>
+                  <div className="flex h-full flex-col items-center justify-center text-slate-400 gap-2 py-10">
+                    <Loader2 className="animate-spin text-blue-600" size={24} />
+                    <p className="text-xs">Menghubungkan ke server apotek...</p>
                   </div>
                 ) : filteredMedicines.length === 0 ? (
-                  <div className="flex h-full items-center justify-center text-slate-400">
-                    <p className="text-sm">
+                  <div className="flex h-full items-center justify-center text-slate-400 py-10">
+                    <p className="text-xs">
                       Obat tidak tersedia atau kata kunci salah.
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {filteredMedicines.map((medicine) => {
                       const isOutOfStock = medicine.stock === 0;
                       const isLowStock =
                         medicine.stock > 0 && medicine.stock <= 10;
+
+                      // Deteksi Expired hari ini (23 Juni 2026)
+                      const isExpired = medicine.expired_date
+                        ? new Date(medicine.expired_date) <= new Date()
+                        : false;
+
                       const categoryName =
                         typeof medicine.category === "object"
                           ? medicine.category.name
@@ -328,33 +353,63 @@ export default function KasirPage() {
                         <div
                           key={medicine.id}
                           onClick={() =>
-                            !isOutOfStock && handleAddToCart(medicine)
+                            !isOutOfStock &&
+                            !isExpired &&
+                            handleAddToCart(medicine)
                           }
-                          className={`group flex flex-col justify-between rounded-xl border p-4 transition-all duration-200 ${
-                            isOutOfStock
-                              ? "border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed"
-                              : "cursor-pointer border-slate-200 bg-white hover:border-blue-400 hover:shadow-sm active:scale-[0.98]"
+                          className={`group flex flex-col justify-between rounded-lg border p-3 transition-all duration-150 ${
+                            isExpired
+                              ? "border-red-200 bg-red-50/30 opacity-75 cursor-not-allowed"
+                              : isOutOfStock
+                                ? "border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed"
+                                : "cursor-pointer border-slate-200 bg-white hover:border-blue-400 hover:shadow-sm active:scale-[0.99]"
                           }`}
                         >
                           <div>
-                            <span className="inline-block rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 mb-2">
-                              {categoryName}
-                            </span>
-                            <h3 className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="inline-block rounded bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                                {categoryName}
+                              </span>
+
+                              {isExpired && (
+                                <span className="animate-pulse rounded bg-red-600 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">
+                                  ⚠️ Kedaluwarsa
+                                </span>
+                              )}
+                            </div>
+
+                            <h3
+                              className={`text-xs font-semibold transition-colors line-clamp-2 ${
+                                isExpired
+                                  ? "text-red-900 group-hover:text-red-600"
+                                  : "text-slate-800 group-hover:text-blue-600"
+                              }`}
+                            >
                               {medicine.name}
                             </h3>
                           </div>
 
-                          <div className="mt-4 flex items-center justify-between border-t border-slate-50 pt-3">
-                            <span className="font-bold text-slate-900">
+                          <div className="mt-2 flex items-center justify-between border-t border-slate-50 pt-2">
+                            <span className="text-xs font-bold text-slate-900">
                               {formatRupiah(medicine.price)}
                             </span>
+
                             <span
-                              className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${isOutOfStock ? "bg-red-50 text-red-600" : isLowStock ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"}`}
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                                isExpired
+                                  ? "bg-red-100 text-red-700 border border-red-200"
+                                  : isOutOfStock
+                                    ? "bg-red-50 text-red-600"
+                                    : isLowStock
+                                      ? "bg-amber-50 text-amber-600"
+                                      : "bg-emerald-50 text-emerald-600"
+                              }`}
                             >
-                              {isOutOfStock
-                                ? "Habis"
-                                : `Stok: ${medicine.stock}`}
+                              {isExpired
+                                ? "Expired"
+                                : isOutOfStock
+                                  ? "Habis"
+                                  : `Stok: ${medicine.stock}`}
                             </span>
                           </div>
                         </div>
@@ -365,135 +420,123 @@ export default function KasirPage() {
               </div>
             </div>
 
-            {/* KERANJANG BELANJA & INTEGRASI CHECKOUT */}
+            {/* 2. KERANJANG BELANJA */}
             <form
               onSubmit={handleSubmitTransaction}
-              className="flex w-96 flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm overflow-hidden"
+              className="col-span-4 flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm overflow-hidden h-full"
             >
-              <div className="flex flex-1 flex-col overflow-hidden">
-                <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
-                  <ShoppingBag size={18} className="text-blue-600" />
-                  <h2 className="font-bold text-slate-900">
-                    Keranjang Belanja
-                  </h2>
-                  <span className="ml-auto rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-600">
-                    {cart.reduce((sum, item) => sum + item.quantity, 0)} item
+              <div className="mb-3 flex flex-shrink-0 items-center gap-2 border-b border-slate-100 pb-2">
+                <ShoppingBag size={16} className="text-blue-600" />
+                <h2 className="text-sm font-bold text-slate-900">Keranjang</h2>
+                <span className="ml-auto rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)} item
+                </span>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-0">
+                {cart.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center text-slate-400 py-10">
+                    <ShoppingBag
+                      size={28}
+                      className="mb-1 stroke-1 text-slate-300"
+                    />
+                    <p className="text-[11px]">Keranjang kosong</p>
+                  </div>
+                ) : (
+                  cart.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex flex-col rounded-lg border border-slate-100 bg-slate-50/50 p-2.5"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-medium text-slate-800 truncate">
+                            {item.name}
+                          </h4>
+                          <span className="text-[10px] text-slate-500">
+                            {formatRupiah(item.price)}/pcs
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFromCart(item.id)}
+                          className="text-slate-400 hover:text-red-500 transition-colors ml-2"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+
+                      <div className="mt-2 flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900">
+                          {formatRupiah(item.price * item.quantity)}
+                        </span>
+                        <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white p-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleDecreaseQuantity(item.id)}
+                            className="rounded bg-slate-50 p-0.5 text-slate-600 hover:bg-slate-100"
+                          >
+                            <Minus size={10} />
+                          </button>
+                          <span className="w-4 text-center text-[11px] font-semibold text-slate-800">
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleAddToCart({
+                                id: item.id,
+                                name: item.name,
+                                price: item.price,
+                                stock: item.stock,
+                                category: item.category,
+                              })
+                            }
+                            className="rounded bg-slate-50 p-0.5 text-slate-600 hover:bg-slate-100"
+                          >
+                            <Plus size={10} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="mt-3 border-t border-slate-100 pt-3 space-y-3 flex-shrink-0 bg-white">
+                <div className="flex justify-between items-center text-sm font-bold text-slate-900">
+                  <span>Total Tagihan</span>
+                  <span className="text-base text-blue-600">
+                    {formatRupiah(totalAmount)}
                   </span>
                 </div>
 
-                <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-                  {cart.length === 0 ? (
-                    <div className="flex h-full flex-col items-center justify-center text-slate-400">
-                      <ShoppingBag
-                        size={32}
-                        className="mb-2 stroke-1 text-slate-300"
-                      />
-                      <p className="text-xs">Keranjang kosong</p>
-                    </div>
-                  ) : (
-                    cart.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex flex-col rounded-xl border border-slate-100 bg-slate-50/50 p-3"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="text-sm font-medium text-slate-800 line-clamp-1">
-                              {item.name}
-                            </h4>
-                            <span className="text-xs text-slate-500">
-                              {formatRupiah(item.price)} / pcs
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFromCart(item.id)}
-                            className="text-slate-400 hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="text-sm font-bold text-slate-900">
-                            {formatRupiah(item.price * item.quantity)}
-                          </span>
-                          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-1">
-                            <button
-                              type="button"
-                              onClick={() => handleDecreaseQuantity(item.id)}
-                              className="rounded bg-slate-50 p-1 text-slate-600 hover:bg-slate-100"
-                            >
-                              <Minus size={12} />
-                            </button>
-                            <span className="w-6 text-center text-xs font-semibold text-slate-800">
-                              {item.quantity}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleAddToCart({
-                                  id: item.id,
-                                  name: item.name,
-                                  price: item.price,
-                                  stock: item.stock,
-                                  category: item.category,
-                                })
-                              }
-                              className="rounded bg-slate-50 p-1 text-slate-600 hover:bg-slate-100"
-                            >
-                              <Plus size={12} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* RINGKASAN PEMBAYARAN KASIR */}
-              <div className="mt-4 border-t border-slate-100 pt-4 space-y-4">
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-sm text-slate-600">
-                    <span>Subtotal</span>
-                    <span>{formatRupiah(totalAmount)}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-100 pb-3 text-base font-bold text-slate-900">
-                    <span>Total Tagihan</span>
-                    <span className="text-blue-600">
-                      {formatRupiah(totalAmount)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* PILIHAN DROPDOWN METODE PEMBAYARAN */}
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1">
-                    <CreditCard size={12} /> Metode Pembayaran
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                    <CreditCard size={10} /> Metode Pembayaran
                   </label>
                   <select
                     value={paymentMethod}
                     onChange={(e) =>
                       setPaymentMethod(e.target.value as PaymentMethod)
                     }
-                    className="w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-800 bg-white outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                    className="w-full rounded-lg border border-slate-200 p-2 text-xs text-slate-800 bg-white outline-none cursor-pointer"
                   >
                     <option value="CASH">💵 TUNAI (CASH)</option>
                     <option value="QRIS">📱 QRIS</option>
-                    <option value="TRANSFER">🏦 TRANSFER BANK</option>
+                    <option value="TRANSFER">🏦 BANK TRANSFER</option>
                     <option value="E_WALLET">💳 E-WALLET</option>
                   </select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                     {paymentMethod === "CASH"
                       ? "Uang Dibayar Pasien"
                       : "Nominal Non-Tunai"}
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
                       Rp
                     </span>
                     <input
@@ -507,13 +550,13 @@ export default function KasirPage() {
                       value={paymentAmount}
                       onChange={(e) => setPaymentAmount(e.target.value)}
                       placeholder="0"
-                      className="w-full rounded-xl border border-slate-200 py-3 pl-10 pr-4 text-sm text-slate-800 outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
+                      className="w-full rounded-lg border border-slate-200 py-2 pl-8 pr-3 text-xs text-slate-800 outline-none disabled:bg-slate-50"
                     />
                   </div>
                 </div>
 
                 {paymentMethod === "CASH" && (
-                  <div className="flex justify-between rounded-xl bg-slate-50 p-3 text-sm border border-slate-100">
+                  <div className="flex justify-between rounded-lg bg-slate-50 p-2 text-xs border border-slate-100">
                     <span className="font-medium text-slate-600">
                       Kembalian
                     </span>
@@ -523,21 +566,23 @@ export default function KasirPage() {
                   </div>
                 )}
 
+                {/* Button Submit */}
                 <PrimaryButton
                   type="submit"
                   disabled={
                     cart.length === 0 ||
-                    (parseFloat(paymentAmount) || 0) < totalAmount ||
-                    isSubmitting
+                    isSubmitting ||
+                    // Jika CASH, pastikan uang yang diinput cukup.
+                    // Jika NON-CASH (E-Wallet, dll), abaikan pengecekan input karena nominal otomatis pas.
+                    (paymentMethod === "CASH" &&
+                      (parseFloat(paymentAmount) || 0) < totalAmount)
                   }
-                  className="w-full py-3.5 shadow-md shadow-blue-100 gap-2"
+                  className="w-full py-2.5 text-xs font-medium shadow-sm gap-2"
                 >
                   {isSubmitting && (
-                    <Loader2 className="animate-spin" size={16} />
+                    <Loader2 className="animate-spin" size={14} />
                   )}
-                  {isSubmitting
-                    ? "Memproses..."
-                    : "Selesaikan Transaksi & Struk"}
+                  {isSubmitting ? "Memproses..." : "Selesaikan Transaksi"}
                 </PrimaryButton>
               </div>
             </form>
