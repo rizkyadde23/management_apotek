@@ -11,17 +11,29 @@ import {
 
 import { Category } from "@/types/category";
 
+import CategoryTable from "@/components/categories/CategoryTable";
+import CategoryFormModal from "@/components/categories/CategoryFormModal";
+import DeleteCategoryModal from "@/components/categories/DeleteCategoryModal";
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+
+import PageHeader from "@/components/ui/PageHeader";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+
+import { Plus } from "lucide-react";
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [loading, setLoading] = useState(true);
 
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [openForm, setOpenForm] = useState(false);
 
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-  });
+  const [openDelete, setOpenDelete] = useState(false);
+
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
 
   useEffect(() => {
     loadData();
@@ -29,148 +41,101 @@ export default function CategoriesPage() {
 
   async function loadData() {
     try {
+      setLoading(true);
+
       const data = await getCategories();
 
       setCategories(data);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleCreate(data: any) {
+    await createCategory(data);
 
-    try {
-      if (editingId) {
-        await updateCategory(editingId, form);
-      } else {
-        await createCategory(form);
-      }
-
-      setForm({
-        name: "",
-        description: "",
-      });
-
-      setEditingId(null);
-
-      loadData();
-    } catch (error) {
-      console.error(error);
-    }
+    await loadData();
   }
 
-  async function handleDelete(id: number) {
-    const confirmDelete = confirm("Yakin ingin menghapus kategori?");
+  async function handleUpdate(data: any) {
+    if (!selectedCategory) return;
 
-    if (!confirmDelete) return;
+    await updateCategory(selectedCategory.id, data);
 
-    await deleteCategory(id);
-
-    loadData();
+    await loadData();
   }
 
-  function handleEdit(category: Category) {
-    setEditingId(category.id);
+  async function handleDelete() {
+    if (!selectedCategory) return;
 
-    setForm({
-      name: category.name,
-      description: category.description ?? "",
-    });
+    await deleteCategory(selectedCategory.id);
+
+    setOpenDelete(false);
+
+    await loadData();
   }
 
   if (loading) {
-    return <div className="p-5">Loading...</div>;
+    return <div className="p-6">Loading...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-black">Kategori Obat</h1>
+    <div className="flex h-screen bg-slate-50">
+      {/* Sidebar */}
+      <Sidebar />
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white border rounded-lg p-5 space-y-4"
-      >
-        <div>
-          <label className="block mb-1 text-black">Nama Kategori</label>
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-          <input
-            value={form.name}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                name: e.target.value,
-              })
-            }
-            className="w-full border rounded p-2 text-black"
-            required
-          />
-        </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-6">
+            <PageHeader
+              title="Categories"
+              description="Manage medicine categories."
+              action={
+                <PrimaryButton
+                  onClick={() => {
+                    setSelectedCategory(null);
+                    setOpenForm(true);
+                  }}
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add Category
+                </PrimaryButton>
+              }
+            />
 
-        <div>
-          <label className="block mb-1 text-black">Deskripsi</label>
-
-          <textarea
-            value={form.description}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                description: e.target.value,
-              })
-            }
-            className="w-full border rounded p-2 text-black"
-          />
-        </div>
-
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-          type="submit"
-        >
-          {editingId ? "Update" : "Tambah"}
-        </button>
-      </form>
-
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 border">Nama</th>
-
-              <th className="p-3 border">Deskripsi</th>
-
-              <th className="p-3 border">Aksi</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {categories.map((category) => (
-              <tr key={category.id}>
-                <td className="border p-3 text-black">{category.name}</td>
-
-                <td className="border p-3 text-black">
-                  {category.description}
-                </td>
-
-                <td className="border p-3 space-x-2">
-                  <button
-                    onClick={() => handleEdit(category)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(category.id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            <CategoryTable
+              categories={categories}
+              onEdit={(category) => {
+                setSelectedCategory(category);
+                setOpenForm(true);
+              }}
+              onDelete={(category) => {
+                setSelectedCategory(category);
+                setOpenDelete(true);
+              }}
+            />
+          </div>
+        </main>
       </div>
+
+      <CategoryFormModal
+        open={openForm}
+        onClose={() => setOpenForm(false)}
+        onSubmit={selectedCategory ? handleUpdate : handleCreate}
+        initialData={selectedCategory || undefined}
+      />
+
+      <DeleteCategoryModal
+        open={openDelete}
+        categoryName={selectedCategory?.name || ""}
+        onClose={() => setOpenDelete(false)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
