@@ -11,7 +11,10 @@ class NotificationRepository
         User $user,
         int $perPage = 10
     ) {
-        return Notification::where('user_id', $user->id)
+        return Notification::where(function($query) use ($user) {
+                $query->where('user_id', $user->id)
+                      ->orWhereNull('user_id'); // ✨ KUNCI: Notifikasi global (NULL) juga ikut diambil
+            })
             ->latest()
             ->paginate($perPage);
     }

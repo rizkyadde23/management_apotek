@@ -1,8 +1,3 @@
-/**
- * Notifications Page
- * Full notification center page
- */
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -24,53 +19,48 @@ export default function NotificationsPage() {
     auto_notification: true,
   });
   const [saving, setSaving] = useState(false);
+
   const {
     notifications,
-    unreadCount,
-    isLoading,
-    error,
+    total,
     currentPage,
     lastPage,
-    total,
+    isLoading,
+    error,
     fetchNotifications,
     markAsRead,
     markAllAsRead,
     deleteNotification,
     deleteAllNotifications,
-  } = useNotifications(token, 10000); // Auto-refresh setiap 10 detik
+  } = useNotifications(token, 10000); // Auto-refresh 10s
 
   async function loadSetting() {
     try {
       const data = await getNotificationSetting();
-
       setSetting(data);
     } catch (error) {
-      console.error(error);
+      console.error("Gagal memuat pengaturan notifikasi:", error);
     }
   }
 
-  // Get token from localStorage
+  // ✨ PERBAIKAN: Gunakan key "token" yang konsisten dengan modul lainnya
   useEffect(() => {
     const savedToken = localStorage.getItem("auth_token");
 
     if (savedToken) {
       setToken(savedToken);
     }
-
     loadSetting();
   }, []);
 
   async function handleSaveSetting() {
     try {
       setSaving(true);
-
       await updateNotificationSetting(setting);
-
-      alert("Notification setting berhasil disimpan.");
+      alert("Pengaturan notifikasi berhasil disimpan.");
     } catch (error) {
       console.error(error);
-
-      alert("Gagal menyimpan setting.");
+      alert("Gagal menyimpan pengaturan.");
     } finally {
       setSaving(false);
     }
@@ -83,10 +73,8 @@ export default function NotificationsPage() {
   return (
     <div className="flex h-screen bg-slate-50">
       <Sidebar />
-
       <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar />
-
         <main className="flex-1 overflow-y-auto p-6">
           <div className="space-y-5">
             <PageHeader
@@ -95,15 +83,7 @@ export default function NotificationsPage() {
             />
 
             {error && (
-              <div
-                className="
-                rounded-2xl
-                border
-                border-red-200
-                bg-red-50
-                p-4
-              "
-              >
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
                 <p className="text-red-700">{error}</p>
               </div>
             )}
@@ -112,13 +92,11 @@ export default function NotificationsPage() {
               <h2 className="text-lg font-semibold text-slate-900 mb-5">
                 Notification Settings
               </h2>
-
               <div className="grid md:grid-cols-2 gap-5">
                 <div>
                   <label className="block mb-2 text-sm font-medium text-slate-700">
                     Expired Warning Days
                   </label>
-
                   <input
                     type="number"
                     value={setting.expired_warning_days}
@@ -128,36 +106,18 @@ export default function NotificationsPage() {
                         expired_warning_days: Number(e.target.value),
                       })
                     }
-                    className="
-                      w-full
-                      border
-                      rounded-xl
-                      px-4
-                      py-3
-                      text-black
-                    "
+                    className="w-full border rounded-xl px-4 py-3 text-black"
                   />
                 </div>
               </div>
-
               <button
                 onClick={handleSaveSetting}
                 disabled={saving}
-                className="
-                  mt-6
-                  bg-blue-600
-                  hover:bg-blue-700
-                  text-white
-                  px-5
-                  py-2
-                  rounded-xl
-                "
+                className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl"
               >
                 {saving ? "Saving..." : "Save Settings"}
               </button>
             </div>
-
-            {/* Notification Center */}
 
             <NotificationCenter
               notifications={notifications}

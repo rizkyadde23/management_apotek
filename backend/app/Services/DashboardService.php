@@ -17,81 +17,67 @@ class DashboardService
     public function summary()
     {
         return [
-
             /*
             |--------------------------------------------------------------------------
-            | Summary Cards
+            | Summary Cards (Hanya Berisi Data Angka/Statistik Utama)
             |--------------------------------------------------------------------------
             */
-
             'cards' => [
-
                 'total_medicines' =>
-                    $this->dashboardRepository
-                        ->totalMedicines(),
+                    $this->dashboardRepository->totalMedicines(),
 
                 'total_suppliers' =>
-                    $this->dashboardRepository
-                        ->totalSuppliers(),
+                    $this->dashboardRepository->totalSuppliers(),
 
                 'low_stock' =>
-                    $this->lowStockRepository
-                        ->countLowStock(),
+                    $this->lowStockRepository->countLowStock(),
 
                 'expired_medicines' =>
-                    $this->expiredRepository
-                        ->countExpired(),
+                    $this->expiredRepository->countExpired(),
 
                 'today_revenue' =>
-                    $this->dashboardRepository
-                        ->todayRevenue(),
+                    $this->dashboardRepository->todayRevenue(),
 
                 'month_revenue' =>
-                    $this->dashboardRepository
-                        ->monthRevenue(),
+                    $this->dashboardRepository->monthRevenue(),
 
                 'today_transactions' =>
-                    $this->dashboardRepository
-                        ->todayTransaction(),
-
-                'low_stock_table' =>
-                    $this->lowStockRepository
-                        ->dashboard(),
-
-                'expired_table' =>
-                    $this->expiredRepository
-                        ->dashboard(),
-
-                'recent_transactions' =>
-                    $this->dashboardRepository
-                        ->recentTransactions(),
-
-                'recent_notifications' =>
-                    $this->dashboardRepository
-                        ->recentNotifications(),
+                    $this->dashboardRepository->todayTransaction(),
             ],
 
             /*
             |--------------------------------------------------------------------------
-            | Analytics
+            | Tables Data (Dikeluarkan dari 'cards' agar terbaca oleh Next.js)
             |--------------------------------------------------------------------------
             */
+            'low_stock_table' =>
+                $this->lowStockRepository->dashboard(),
 
+            'expired_table' =>
+                $this->expiredRepository->dashboard(),
+
+            'recent_transactions' =>
+                $this->dashboardRepository->recentTransactions(),
+
+            'recent_notifications' =>
+                $this->dashboardRepository->recentNotifications(),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Analytics Charts
+            |--------------------------------------------------------------------------
+            */
             'sales_chart' =>
-                $this->dashboardRepository
-                    ->salesChart(),
+                $this->dashboardRepository->salesChart(),
 
             'top_medicines' =>
-                $this->dashboardRepository
-                    ->topSellingMedicines(),
+                $this->dashboardRepository->topSellingMedicines(),
 
             'stock_chart' =>
-                $this->dashboardRepository
-                    ->stockChart(),
+                $this->dashboardRepository->stockChart(),
 
             'payment_chart' =>
-                $this->dashboardRepository
-                    ->paymentChart(),
+                $this->dashboardRepository->paymentChart(),
         ];
     }
 }

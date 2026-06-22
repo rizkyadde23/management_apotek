@@ -159,17 +159,21 @@ public function stockChart()
 
 public function paymentChart()
 {
-    return Transaction::select(
-
-            'payment_status as status',
-
+    $data = Transaction::join('payments', 'transactions.id', '=', 'payments.transaction_id')
+        ->select(
+            DB::raw('UPPER(payments.payment_method) as status'), // Paksa jadi huruf besar semua
             DB::raw('COUNT(*) as total')
-
         )
-
-        ->groupBy('payment_status')
-
+        ->groupBy('payments.payment_method')
         ->get();
+
+    // ✨ KUNCI PERBAIKAN: Ubah string total menjadi bentuk angka (integer) murni
+    return $data->map(function ($item) {
+        return [
+            'status' => $item->status,
+            'total'  => (int) $item->total // Cast paksa ke integer
+        ];
+    });
 }
 
 public function recentTransactions()

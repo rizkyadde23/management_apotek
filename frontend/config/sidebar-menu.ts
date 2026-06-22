@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   ClipboardList,
   Package,
+  History,
   Boxes,
   Bell,
   FileBarChart2,
@@ -41,8 +42,8 @@ export const sidebarSections: SidebarSection[] = [
       {
         label: "Kasir (POS)",
         href: "/cashier",
-        icon: ShoppingCart, // Import dari lucide-react
-        roles: ["ADMIN", "OWNER", "APOTEKER"], // Hak akses menu kasir
+        icon: ShoppingCart,
+        roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
     ],
   },
@@ -56,26 +57,23 @@ export const sidebarSections: SidebarSection[] = [
         icon: Pill,
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
-
       {
         label: "Categories",
         href: "/categories",
         icon: FolderTree,
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
-
       {
         label: "Suppliers",
         href: "/suppliers",
         icon: Truck,
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
-
       {
         label: "Users",
         href: "/users",
         icon: Users,
-        roles: ["ADMIN"],
+        roles: ["ADMIN"], // Sesuai Route::middleware('role:ADMIN')
       },
     ],
   },
@@ -89,14 +87,12 @@ export const sidebarSections: SidebarSection[] = [
         icon: ShoppingCart,
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
-
       {
         label: "Purchase Orders",
         href: "/purchase-orders",
         icon: Package,
-        roles: ["ADMIN", "OWNER"],
+        roles: ["ADMIN", "OWNER"], // Sesuai Route::middleware('role:ADMIN,OWNER')
       },
-
       {
         label: "Pre Orders",
         href: "/pre-orders",
@@ -115,21 +111,18 @@ export const sidebarSections: SidebarSection[] = [
         icon: Boxes,
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
-
       {
         label: "Stock Logs",
         href: "/stock-logs",
-        icon: Boxes,
+        icon: History, // Diganti ke History agar membedakan visual dari low stock
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
-
       {
         label: "Expired Medicines",
         href: "/expired-medicines",
         icon: Bell,
         roles: ["ADMIN", "OWNER", "APOTEKER"],
       },
-
       {
         label: "Notifications",
         href: "/notifications",
@@ -146,14 +139,13 @@ export const sidebarSections: SidebarSection[] = [
         label: "Reports",
         href: "/reports",
         icon: FileBarChart2,
-        roles: ["ADMIN", "OWNER", "APOTEKER"],
+        roles: ["ADMIN", "OWNER"], // 🌟 APOTEKER DIHAPUS: Menyesuaikan rute backend baru
       },
-
       {
         label: "Audit Logs",
         href: "/audit-logs",
         icon: ShieldCheck,
-        roles: ["ADMIN", "OWNER"],
+        roles: ["ADMIN", "OWNER"], // Sesuai Route::middleware('role:ADMIN,OWNER')
       },
     ],
   },

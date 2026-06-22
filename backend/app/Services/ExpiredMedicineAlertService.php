@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Medicine;
+use App\Models\Notification;
 use App\Models\ExpiredMedicineAlert;
 use App\Repositories\ExpiredMedicineAlertRepository;
+use Carbon\Carbon;
 
 class ExpiredMedicineAlertService
 {
@@ -39,7 +41,11 @@ class ExpiredMedicineAlertService
             ->get();
 
         foreach ($medicines as $medicine) {
-            $daysUntilExpiry = now()->diffInDays($medicine->expired_date);
+            $expiryDate = Carbon::parse($medicine->expired_date);
+            $today = now()->startOfDay();
+
+            // Menggunakan diffInDays dengan parameter false agar menghasilkan minus jika sudah lewat tanggalnya
+            $daysUntilExpiry = $today->diffInDays($expiryDate, false);
 
             $existingAlert = ExpiredMedicineAlert::where('medicine_id', $medicine->id)
                 ->whereIn('status', ['PENDING', 'ACKNOWLEDGED'])
@@ -49,26 +55,50 @@ class ExpiredMedicineAlertService
                 continue;
             }
 
-            if ($daysUntilExpiry <= 0) {
+            // Penentuan Tipe Alert & Pembuatan Judul Pesan Notifikasi
+            if ($daysUntilExpiry < 0) {
                 $alertType = 'CRITICAL';
+                $title = '🚨 Obat Telah Kadaluarsa!';
+                $notes = "Obat {$medicine->name} sudah kadaluarsa sejak " . abs($daysUntilExpiry) . " hari yang lalu!";
             } elseif ($daysUntilExpiry <= 7) {
                 $alertType = 'CRITICAL';
+                $title = '🔥 Bahaya: Obat Kadaluarsa < 7 Hari';
+                $notes = "Obat {$medicine->name} akan kadaluarsa kritis dalam {$daysUntilExpiry} hari.";
             } elseif ($daysUntilExpiry <= 14) {
                 $alertType = 'WARNING';
+                $title = '⚠️ Peringatan: Obat Kadaluarsa < 14 Hari';
+                $notes = "Obat {$medicine->name} akan kadaluarsa dalam {$daysUntilExpiry} hari.";
             } elseif ($daysUntilExpiry <= 30) {
                 $alertType = 'INFO';
+                $title = 'ℹ️ Info: Obat Kadaluarsa < 30 Hari';
+                $notes = "Obat {$medicine->name} memasuki masa tenggang kadaluarsa {$daysUntilExpiry} hari.";
             } else {
                 continue;
             }
 
-            $this->repository->create([
-                'medicine_id' => $medicine->id,
-                'alert_type' => $alertType,
-                'status' => 'PENDING',
-                'expiry_date' => $medicine->expired_date,
-                'days_until_expiry' => $daysUntilExpiry,
-                'notes' => "{$medicine->name} akan kadaluarsa dalam {$daysUntilExpiry} hari"
-            ]);
+            try {
+                // 1. Simpan ke data log alert melalui repository kamu
+                $this->repository->create([
+                    'medicine_id' => $medicine->id,
+                    'alert_type' => $alertType,
+                    'status' => 'PENDING',
+                    'expiry_date' => $medicine->expired_date,
+                    'days_until_expiry' => $daysUntilExpiry,
+                    'notes' => $notes
+                ]);
+
+                // 2. ✨ PERBAIKAN KUNCI: Ubah 'type' menjadi 'EXPIRED' agar sesuai dengan ENUM database
+                \App\Models\Notification::create([
+                    'title' => $title,
+                    'message' => $notes,
+                    'type' => 'EXPIRED', // 🌟 Sesuai dengan enum('LOW_STOCK', 'EXPIRED', 'PREORDER')
+                    'is_read' => false,
+                    'user_id' => null,   // Global notification
+                ]);
+            } catch (\Exception $e) {
+                \Log::error("Gagal membuat notifikasi obat expired: " . $e->getMessage());
+                throw $e; 
+            }
         }
     }
 
