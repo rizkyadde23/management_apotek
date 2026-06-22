@@ -11,15 +11,25 @@ export default function DashboardLayout({
 }) {
   return (
     <ProtectedLayout>
-      <div className="flex min-h-screen bg-slate-100">
+      <div className="flex h-screen overflow-hidden bg-slate-100">
+
+        {/* Sidebar tetap */}
         <Sidebar />
 
-        <div className="flex-1">
+        {/* Area kanan */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Navbar tetap */}
           <Navbar />
-
-          <main className="p-6">
+          {/* Hanya konten yang scroll */}
+          <main
+            className="
+              flex-1
+              overflow-y-auto
+              p-6
+            "
+          >
             {children}
-          </main>
+          </main>\
         </div>
       </div>
     </ProtectedLayout>

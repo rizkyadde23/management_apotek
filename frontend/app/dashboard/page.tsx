@@ -54,12 +54,10 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-slate-900 mb-6">Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        <div className="mt-8">
+        <div className="mb-8">
           <RecentNotificationTable data={data.recent_notifications} />
         </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
         <StatCard title="Total Obat" value={data.cards.total_medicines} />
 
         <StatCard title="Total Supplier" value={data.cards.total_suppliers} />
