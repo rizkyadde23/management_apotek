@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import Badge from "@/components/ui/Badge";
+
 import {
   getExpiredMedicines,
   getExpiringSoonMedicines,
@@ -12,6 +16,8 @@ import type { ExpiredMedicine, ExpiredSummary } from "@/types/expired-medicine";
 
 export default function ExpiredMedicinesPage() {
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
 
   const [expiredMedicines, setExpiredMedicines] = useState<ExpiredMedicine[]>(
     [],
@@ -54,156 +60,268 @@ export default function ExpiredMedicinesPage() {
     return new Date(date).toLocaleDateString("id-ID");
   }
 
+  const filteredExpired = expiredMedicines.filter(
+    (medicine) =>
+      medicine.name.toLowerCase().includes(search.toLowerCase()) ||
+      medicine.code.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const filteredExpiringSoon = expiringSoonMedicines.filter(
+    (medicine) =>
+      medicine.name.toLowerCase().includes(search.toLowerCase()) ||
+      medicine.code.toLowerCase().includes(search.toLowerCase()),
+  );
+
   if (loading) {
-    return <div className="p-5">Loading...</div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Navbar />
+
+          <div className="p-6">Loading Expired Medicines...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-black">Expired Medicines</h1>
+    <div className="flex h-screen bg-slate-100 overflow-hidden">
+      <Sidebar />
 
-      {/* Summary */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-white border rounded-xl p-5">
-          <h3 className="text-slate-500">Expired Medicines</h3>
+        <main className="flex-1 overflow-y-auto p-8 space-y-6">
+          {/* Header */}
 
-          <p className="text-3xl font-bold text-red-600">
-            {summary.expired_count}
-          </p>
-        </div>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Expired Medicines
+            </h1>
 
-        <div className="bg-white border rounded-xl p-5">
-          <h3 className="text-slate-500">Expiring Soon</h3>
+            <p className="mt-1 text-slate-500">
+              Monitoring obat yang telah expired dan akan segera expired.
+            </p>
+          </div>
 
-          <p className="text-3xl font-bold text-orange-600">
-            {summary.expiring_soon_count}
-          </p>
-        </div>
-      </div>
+          {/* Summary */}
 
-      {/* Expired */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <p className="text-sm text-slate-500">Expired Medicines</p>
 
-      <div className="bg-white border rounded-xl overflow-hidden">
-        <div className="p-4 border-b">
-          <h2 className="font-bold text-lg text-black">Expired Medicines</h2>
-        </div>
+              <h3 className="mt-2 text-3xl font-bold text-red-600">
+                {summary.expired_count}
+              </h3>
+            </div>
 
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="border p-3">Code</th>
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+              <p className="text-sm text-slate-500">Expiring Soon</p>
 
-              <th className="border p-3">Medicine</th>
+              <h3 className="mt-2 text-3xl font-bold text-orange-600">
+                {summary.expiring_soon_count}
+              </h3>
+            </div>
+          </div>
 
-              <th className="border p-3">Batch</th>
+          {/* Search */}
 
-              <th className="border p-3">Stock</th>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <input
+              type="text"
+              placeholder="Cari nama obat atau kode..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="
+                w-full
+                rounded-xl
+                border
+                border-slate-300
+                px-4
+                py-3
+                text-black
+                outline-none
+                focus:border-blue-500
+              "
+            />
+          </div>
 
-              <th className="border p-3">Expired Date</th>
+          {/* Expired Medicines */}
 
-              <th className="border p-3">Status</th>
-            </tr>
-          </thead>
+          <div
+            className="
+              bg-white
+              border
+              border-slate-200
+              rounded-2xl
+              overflow-hidden
+              shadow-sm
+            "
+          >
+            <div className="p-5 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Expired Medicines
+              </h2>
+            </div>
 
-          <tbody>
-            {expiredMedicines.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-6 text-center text-slate-500">
-                  Tidak ada obat expired
-                </td>
-              </tr>
-            ) : (
-              expiredMedicines.map((medicine) => (
-                <tr key={medicine.id}>
-                  <td className="border p-3 text-black">{medicine.code}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="px-4 py-3 text-left">Code</th>
 
-                  <td className="border p-3 text-black">{medicine.name}</td>
+                    <th className="px-4 py-3 text-left">Medicine</th>
 
-                  <td className="border p-3 text-black">
-                    {medicine.batch_number}
-                  </td>
+                    <th className="px-4 py-3 text-left">Batch</th>
 
-                  <td className="border p-3 text-red-600 font-bold">
-                    {medicine.stock}
-                  </td>
+                    <th className="px-4 py-3 text-center">Stock</th>
 
-                  <td className="border p-3 text-black">
-                    {formatDate(medicine.expired_date)}
-                  </td>
+                    <th className="px-4 py-3 text-center">Expired Date</th>
 
-                  <td className="border p-3">
-                    <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs">
-                      EXPIRED
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                    <th className="px-4 py-3 text-center">Status</th>
+                  </tr>
+                </thead>
 
-      {/* Expiring Soon */}
+                <tbody>
+                  {filteredExpired.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="py-10 text-center text-slate-500"
+                      >
+                        Tidak ada obat expired
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredExpired.map((medicine) => (
+                      <tr
+                        key={medicine.id}
+                        className="
+                            border-t
+                            border-slate-100
+                            hover:bg-slate-50
+                          "
+                      >
+                        <td className="px-4 py-4 text-slate-700">
+                          {medicine.code}
+                        </td>
 
-      <div className="bg-white border rounded-xl overflow-hidden">
-        <div className="p-4 border-b">
-          <h2 className="font-bold text-lg text-black">Expiring Soon</h2>
-        </div>
+                        <td className="px-4 py-4 font-medium text-slate-900">
+                          {medicine.name}
+                        </td>
 
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="border p-3">Code</th>
+                        <td className="px-4 py-4 text-slate-700">
+                          {medicine.batch_number}
+                        </td>
 
-              <th className="border p-3">Medicine</th>
+                        <td className="px-4 py-4 text-center font-semibold text-red-600">
+                          {medicine.stock}
+                        </td>
 
-              <th className="border p-3">Batch</th>
+                        <td className="px-4 py-4 text-center text-slate-700">
+                          {formatDate(medicine.expired_date)}
+                        </td>
 
-              <th className="border p-3">Stock</th>
+                        <td className="px-4 py-4 text-center">
+                          <Badge color="red">EXPIRED</Badge>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-              <th className="border p-3">Expired Date</th>
+          {/* Expiring Soon */}
 
-              <th className="border p-3">Status</th>
-            </tr>
-          </thead>
+          <div
+            className="
+              bg-white
+              border
+              border-slate-200
+              rounded-2xl
+              overflow-hidden
+              shadow-sm
+            "
+          >
+            <div className="p-5 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Expiring Soon
+              </h2>
+            </div>
 
-          <tbody>
-            {expiringSoonMedicines.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-6 text-center text-slate-500">
-                  Tidak ada obat yang akan expired
-                </td>
-              </tr>
-            ) : (
-              expiringSoonMedicines.map((medicine) => (
-                <tr key={medicine.id}>
-                  <td className="border p-3 text-black">{medicine.code}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50">
+                    <th className="px-4 py-3 text-left">Code</th>
 
-                  <td className="border p-3 text-black">{medicine.name}</td>
+                    <th className="px-4 py-3 text-left">Medicine</th>
 
-                  <td className="border p-3 text-black">
-                    {medicine.batch_number}
-                  </td>
+                    <th className="px-4 py-3 text-left">Batch</th>
 
-                  <td className="border p-3 text-orange-600 font-semibold">
-                    {medicine.stock}
-                  </td>
+                    <th className="px-4 py-3 text-center">Stock</th>
 
-                  <td className="border p-3 text-black">
-                    {formatDate(medicine.expired_date)}
-                  </td>
+                    <th className="px-4 py-3 text-center">Expired Date</th>
 
-                  <td className="border p-3">
-                    <span className="px-2 py-1 rounded bg-orange-100 text-orange-700 text-xs">
-                      EXPIRING SOON
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    <th className="px-4 py-3 text-center">Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredExpiringSoon.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="py-10 text-center text-slate-500"
+                      >
+                        Tidak ada obat yang akan expired
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredExpiringSoon.map((medicine) => (
+                      <tr
+                        key={medicine.id}
+                        className="
+                            border-t
+                            border-slate-100
+                            hover:bg-slate-50
+                          "
+                      >
+                        <td className="px-4 py-4 text-slate-700">
+                          {medicine.code}
+                        </td>
+
+                        <td className="px-4 py-4 font-medium text-slate-900">
+                          {medicine.name}
+                        </td>
+
+                        <td className="px-4 py-4 text-slate-700">
+                          {medicine.batch_number}
+                        </td>
+
+                        <td className="px-4 py-4 text-center font-semibold text-orange-600">
+                          {medicine.stock}
+                        </td>
+
+                        <td className="px-4 py-4 text-center text-slate-700">
+                          {formatDate(medicine.expired_date)}
+                        </td>
+
+                        <td className="px-4 py-4 text-center">
+                          <Badge color="yellow">EXPIRING SOON</Badge>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );

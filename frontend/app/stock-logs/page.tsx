@@ -58,13 +58,13 @@ export default function StockLogPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex h-screen bg-slate-100 overflow-hidden">
       <Sidebar />
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar />
 
-        <main className="flex-1 p-8 space-y-6">
+        <main className="flex-1 overflow-y-auto p-8 space-y-6">
           {/* Header */}
 
           <div>
