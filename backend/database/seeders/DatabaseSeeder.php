@@ -30,9 +30,5 @@ class DatabaseSeeder extends Seeder
             PurchaseOrderSeeder::class,
             NotificationSettingSeeder::class,
         ]);
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
     }
 }
