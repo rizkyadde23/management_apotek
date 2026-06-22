@@ -3,32 +3,26 @@
 namespace App\Repositories;
 
 use App\Models\Medicine;
-use App\Models\NotificationSetting;
 
 class LowStockRepository
 {
-    private function threshold()
-    {
-        return NotificationSetting::first()?->low_stock_threshold ?? 10;
-    }
-
     public function getLowStockMedicines()
     {
         return Medicine::with([
                 'category',
                 'supplier'
             ])
-            ->where('stock', '<=', $this->threshold())
+            ->whereColumn('stock', '<=', 'minimum_stock')
             ->orderBy('stock')
             ->paginate(10);
     }
 
     public function countLowStock()
     {
-        return Medicine::where(
+        return Medicine::whereColumn(
             'stock',
             '<=',
-            $this->threshold()
+            'minimum_stock'
         )->count();
     }
 

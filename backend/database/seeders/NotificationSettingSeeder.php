@@ -15,9 +15,7 @@ class NotificationSettingSeeder extends Seeder
         NotificationSetting::firstOrCreate(
             ['id' => 1],
             [
-                'low_stock_threshold' => 10,
                 'expired_warning_days' => 30,
-                'auto_notification' => true,
             ]
         );
     }

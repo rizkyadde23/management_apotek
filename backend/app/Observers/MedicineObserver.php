@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Medicine;
+use App\Models\User;
+use App\Models\Notification;
 use App\Services\AuditLogService;
 
 class MedicineObserver
@@ -37,6 +39,20 @@ class MedicineObserver
             $medicine->getOriginal(),
             $medicine->getChanges()
         );
+
+        if ($medicine->stock <= $medicine->minimum_stock) {
+
+        $users = User::all();
+
+        foreach ($users as $user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'LOW_STOCK',
+                'title' => 'Low Stock Alert',
+                'message' => "{$medicine->name} hampir habis. Stok saat ini {$medicine->stock}",
+            ]);
+        }
+    }
     }
 
     /**

@@ -5,34 +5,26 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function NavbarNotification() {
-
   const { token } = useAuth();
 
-  const {
-    unreadCount,
-  } = useNotifications(
-    token,
-    10000
-  );
+  const { unreadCount } = useNotifications(token, 10000);
 
   return (
-    <button
-      className="
+    <a href="/notifications">
+      <button
+        className="
       relative
       rounded-xl
       p-3
       transition
       hover:bg-slate-100
       "
-    >
-      <Bell
-        size={22}
-        className="text-slate-700"
-      />
+      >
+        <Bell size={22} className="text-slate-700" />
 
-      {unreadCount > 0 && (
-        <span
-          className="
+        {unreadCount > 0 && (
+          <span
+            className="
           absolute
           -right-1
           -top-1
@@ -47,10 +39,11 @@ export default function NavbarNotification() {
           font-bold
           text-white
           "
-        >
-          {unreadCount}
-        </span>
-      )}
-    </button>
+          >
+            {unreadCount}
+          </span>
+        )}
+      </button>
+    </a>
   );
 }

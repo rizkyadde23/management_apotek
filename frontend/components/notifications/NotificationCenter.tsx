@@ -89,16 +89,6 @@ export function NotificationCenter({
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Pusat Notifikasi
-        </h1>
-        <p className="text-gray-600">
-          Total {total} notifikasi ({unreadCount} belum dibaca)
-        </p>
-      </div>
-
       {/* Toolbar */}
       <div className="mb-6 flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center">
         {/* Filters */}
@@ -157,12 +147,7 @@ export function NotificationCenter({
       </div>
 
       {/* Notifications List */}
-      {isLoading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin inline-block w-8 h-8 border-4 border-gray-300 border-t-blue-600 rounded-full"></div>
-          <p className="mt-4 text-gray-600">Memuat notifikasi...</p>
-        </div>
-      ) : filteredNotifications.length === 0 ? (
+      {filteredNotifications.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-600">Tidak ada notifikasi</p>
         </div>
@@ -181,7 +166,7 @@ export function NotificationCenter({
                     </h3>
                     <span
                       className={`text-xs px-3 py-1 rounded-full ${getTypeBadgeColor(
-                        notif.type
+                        notif.type,
                       )}`}
                     >
                       {notif.type}
@@ -238,7 +223,7 @@ export function NotificationCenter({
                 (page) =>
                   page === 1 ||
                   page === lastPage ||
-                  (page >= currentPage - 1 && page <= currentPage + 1)
+                  (page >= currentPage - 1 && page <= currentPage + 1),
               )
               .map((page, i, arr) => (
                 <div key={page}>
