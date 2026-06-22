@@ -6,8 +6,20 @@ import { getUsers, createUser, updateUser, deleteUser } from "@/lib/api/users";
 
 import { User } from "@/types/user";
 
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+
+import PageHeader from "@/components/ui/PageHeader";
+import SearchBar from "@/components/ui/SearchBar";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+
+import UserStats from "@/components/users/UserStats";
+import UserTable from "@/components/users/UserTable";
+
 import UserFormModal from "@/components/users/UserFormModal";
 import DeleteUserModal from "@/components/users/DeleteUserModal";
+
+import { Plus } from "lucide-react";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -44,8 +56,6 @@ export default function UsersPage() {
     try {
       await createUser(formData);
 
-      setOpenForm(false);
-
       await loadData();
     } catch (error) {
       console.error(error);
@@ -59,8 +69,6 @@ export default function UsersPage() {
 
     try {
       await updateUser(selectedUser.id, formData);
-
-      setOpenForm(false);
 
       await loadData();
     } catch (error) {
@@ -93,100 +101,67 @@ export default function UsersPage() {
   );
 
   if (loading) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col">
+          <Navbar />
+
+          <div className="p-6">Loading users...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-slate-900">Users</h1>
+    <div className="flex h-screen bg-slate-50">
+      <Sidebar />
 
-        <button
-          onClick={() => {
-            setSelectedUser(null);
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-            setOpenForm(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-        >
-          + Tambah User
-        </button>
-      </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-6">
+            <PageHeader
+              title="Users"
+              description="Manage system users and permissions."
+              action={
+                <PrimaryButton
+                  onClick={() => {
+                    setSelectedUser(null);
+                    setOpenForm(true);
+                  }}
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add User
+                </PrimaryButton>
+              }
+            />
 
-      <input
-        type="text"
-        placeholder="Cari user..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="border rounded-lg p-2 w-full text-black"
-      />
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search user..."
+            />
 
-      <div className="bg-white rounded-xl border overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 text-left">Nama</th>
+            <UserStats users={users} />
 
-              <th className="p-3 text-left">Email</th>
+            <UserTable
+              users={filteredUsers}
+              onEdit={(user) => {
+                setSelectedUser(user);
 
-              <th className="p-3 text-left">Role</th>
+                setOpenForm(true);
+              }}
+              onDelete={(user) => {
+                setSelectedUser(user);
 
-              <th className="p-3 text-left">Status</th>
-
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="border-t">
-                <td className="p-3 text-black">{user.name}</td>
-
-                <td className="p-3 text-black">{user.email}</td>
-
-                <td className="p-3 text-black">{user.role?.name ?? "-"}</td>
-
-                <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      user.is_active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {user.is_active ? "Aktif" : "Non Aktif"}
-                  </span>
-                </td>
-
-                <td className="p-3">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedUser(user);
-
-                        setOpenForm(true);
-                      }}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setSelectedUser(user);
-
-                        setOpenDelete(true);
-                      }}
-                      className="bg-red-600 text-white px-3 py-1 rounded"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                setOpenDelete(true);
+              }}
+            />
+          </div>
+        </main>
       </div>
 
       <UserFormModal
