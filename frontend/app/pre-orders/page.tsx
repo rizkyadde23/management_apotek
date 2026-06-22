@@ -11,12 +11,29 @@ import {
 
 import PreOrderDetailModal from "@/components/pre-orders/PreOrderDetailModal";
 
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+
+import PageHeader from "@/components/ui/PageHeader";
+import SearchBar from "@/components/ui/SearchBar";
+
+import PreOrderStats from "@/components/pre-orders/PreOrderStats";
+import PreOrderTable from "@/components/pre-orders/PreOrderTable";
+
 export default function PreOrdersPage() {
   const [preOrders, setPreOrders] = useState<any[]>([]);
 
   const [selected, setSelected] = useState<any>(null);
 
   const [openDetail, setOpenDetail] = useState(false);
+
+  const [search, setSearch] = useState("");
+
+  const filteredPreOrders = preOrders.filter(
+    (item) =>
+      item.customer_name.toLowerCase().includes(search.toLowerCase()) ||
+      item.medicine?.name?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   useEffect(() => {
     loadData();
@@ -47,86 +64,46 @@ export default function PreOrdersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-black">Pre Order</h1>
+    <div className="flex h-screen bg-slate-100">
+      <Sidebar />
 
-      <div className="bg-white rounded-xl border overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 border">Customer</th>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-              <th className="p-3 border">Obat</th>
+        <main className="flex-1 overflow-y-auto p-8">
+          <div className="space-y-6">
+            <PageHeader
+              title="Pre Orders"
+              description="Manage customer medicine reservations."
+            />
 
-              <th className="p-3 border">Qty</th>
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search pre order..."
+            />
 
-              <th className="p-3 border">Status</th>
+            <PreOrderStats preOrders={filteredPreOrders} />
 
-              <th className="p-3 border">Aksi</th>
-            </tr>
-          </thead>
+            <PreOrderTable
+              preOrders={filteredPreOrders}
+              onDetail={(item) => {
+                setSelected(item);
+                setOpenDetail(true);
+              }}
+              onReady={handleReady}
+              onComplete={handleComplete}
+              onCancel={handleCancel}
+            />
+          </div>
+        </main>
 
-          <tbody>
-            {preOrders.map((item) => (
-              <tr key={item.id}>
-                <td className="border p-3 text-black">{item.customer_name}</td>
-
-                <td className="border p-3 text-black">{item.medicine?.name}</td>
-
-                <td className="border p-3 text-black">{item.quantity}</td>
-
-                <td className="border p-3 text-black">{item.status}</td>
-
-                <td className="border p-3 flex gap-2">
-                  <button
-                    onClick={() => {
-                      setSelected(item);
-
-                      setOpenDetail(true);
-                    }}
-                    className="bg-blue-600 text-white px-3 py-1 rounded"
-                  >
-                    Detail
-                  </button>
-
-                  {item.status === "PENDING" && (
-                    <>
-                      <button
-                        onClick={() => handleReady(item.id)}
-                        className="bg-green-600 text-white px-3 py-1 rounded"
-                      >
-                        Ready
-                      </button>
-
-                      <button
-                        onClick={() => handleCancel(item.id)}
-                        className="bg-red-600 text-white px-3 py-1 rounded"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  )}
-
-                  {item.status === "READY" && (
-                    <button
-                      onClick={() => handleComplete(item.id)}
-                      className="bg-purple-600 text-white px-3 py-1 rounded"
-                    >
-                      Complete
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <PreOrderDetailModal
+          open={openDetail}
+          preorder={selected}
+          onClose={() => setOpenDetail(false)}
+        />
       </div>
-
-      <PreOrderDetailModal
-        open={openDetail}
-        preorder={selected}
-        onClose={() => setOpenDetail(false)}
-      />
     </div>
   );
 }
