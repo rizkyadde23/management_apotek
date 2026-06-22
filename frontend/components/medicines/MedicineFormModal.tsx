@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+
 import { getCategories } from "@/lib/api/categories";
 import { getSuppliers } from "@/lib/api/suppliers";
 
@@ -19,7 +21,6 @@ export default function MedicineFormModal({
 }: Props) {
   const [categories, setCategories] = useState<any[]>([]);
   const [suppliers, setSuppliers] = useState<any[]>([]);
-
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -44,7 +45,18 @@ export default function MedicineFormModal({
 
     if (initialData) {
       setForm({
-        ...initialData,
+        supplier_id: initialData.supplier_id ?? "",
+        category_id: initialData.category_id ?? "",
+        code: initialData.code ?? "",
+        batch_number: initialData.batch_number ?? "",
+        name: initialData.name ?? "",
+        description: initialData.description ?? "",
+        type: initialData.type ?? "GENERIC",
+        stock: initialData.stock ?? 0,
+        minimum_stock: initialData.minimum_stock ?? 10,
+        price: initialData.price ?? 0,
+        expired_date: initialData.expired_date ?? "",
+        is_active: initialData.is_active ?? true,
       });
     }
   }, [open, initialData]);
@@ -90,24 +102,106 @@ export default function MedicineFormModal({
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/50 overflow-y-auto z-50">
-      <div className="max-w-3xl mx-auto bg-white mt-10 rounded-xl p-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">
-          {initialData ? "Edit Obat" : "Tambah Obat"}
-        </h2>
+  const inputClass = `
+    w-full
+    rounded-xl
+    border
+    border-slate-300
+    px-4
+    py-3
+    text-slate-900
+    outline-none
+    transition
+    focus:border-blue-500
+    focus:ring-4
+    focus:ring-blue-100
+  `;
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+  const labelClass = `
+    mb-2
+    block
+    text-sm
+    font-medium
+    text-slate-700
+  `;
+
+  return (
+    <div
+      className="
+        fixed
+        inset-0
+        z-50
+        flex
+        items-center
+        justify-center
+        bg-black/40
+        backdrop-blur-sm
+        p-4
+      "
+    >
+      <div
+        className="
+          w-full
+          max-w-5xl
+          rounded-3xl
+          bg-white
+          shadow-2xl
+          border
+          border-slate-200
+          overflow-hidden
+          max-h-[90vh]
+          overflow-y-auto
+        "
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between border-b border-slate-200 px-8 py-6">
           <div>
-            <label className="block mb-1 text-slate-700">Supplier</label>
+            <h2 className="text-2xl font-bold text-slate-900">
+              {initialData ? "Edit Medicine" : "Add Medicine"}
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Manage medicine information and inventory data.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="
+              rounded-xl
+              p-2
+              text-slate-500
+              transition
+              hover:bg-slate-100
+            "
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="
+            grid
+            grid-cols-1
+            gap-5
+            p-8
+            md:grid-cols-2
+          "
+        >
+          {/* Supplier */}
+          <div>
+            <label className={labelClass}>Supplier</label>
 
             <select
               name="supplier_id"
               value={form.supplier_id}
               onChange={handleChange}
-              className="border rounded-lg p-2 w-full text-black"
+              className={inputClass}
             >
-              <option value="">Pilih Supplier</option>
+              <option value="">Select Supplier</option>
 
               {suppliers.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -117,16 +211,17 @@ export default function MedicineFormModal({
             </select>
           </div>
 
+          {/* Category */}
           <div>
-            <label className="block mb-1 text-slate-700">Kategori</label>
+            <label className={labelClass}>Category</label>
 
             <select
               name="category_id"
               value={form.category_id}
               onChange={handleChange}
-              className="border rounded-lg p-2 w-full text-black"
+              className={inputClass}
             >
-              <option value="">Pilih Kategori</option>
+              <option value="">Select Category</option>
 
               {categories.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -136,99 +231,191 @@ export default function MedicineFormModal({
             </select>
           </div>
 
-          <input
-            name="code"
-            placeholder="Kode Obat"
-            value={form.code}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
-          />
+          {/* Code */}
+          <div>
+            <label className={labelClass}>Medicine Code</label>
 
-          <input
-            name="batch_number"
-            placeholder="Batch Number"
-            value={form.batch_number}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
-          />
+            <input
+              name="code"
+              value={form.code}
+              onChange={handleChange}
+              placeholder="MED-001"
+              className={inputClass}
+            />
+          </div>
 
-          <input
-            name="name"
-            placeholder="Nama Obat"
-            value={form.name}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
-          />
+          {/* Batch */}
+          <div>
+            <label className={labelClass}>Batch Number</label>
 
-          <select
-            name="type"
-            value={form.type}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
+            <input
+              name="batch_number"
+              value={form.batch_number}
+              onChange={handleChange}
+              placeholder="BATCH-001"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Name */}
+          <div>
+            <label className={labelClass}>Medicine Name</label>
+
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Paracetamol"
+              className={inputClass}
+            />
+          </div>
+
+          {/* Type */}
+          <div>
+            <label className={labelClass}>Medicine Type</label>
+
+            <select
+              name="type"
+              value={form.type}
+              onChange={handleChange}
+              className={inputClass}
+            >
+              <option value="GENERIC">Generic</option>
+              <option value="NON_GENERIC">Non Generic</option>
+            </select>
+          </div>
+
+          {/* Stock */}
+          <div>
+            <label className={labelClass}>Current Stock</label>
+
+            <input
+              type="number"
+              name="stock"
+              value={form.stock}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </div>
+
+          {/* Minimum Stock */}
+          <div>
+            <label className={labelClass}>Minimum Stock</label>
+
+            <input
+              type="number"
+              name="minimum_stock"
+              value={form.minimum_stock}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </div>
+
+          {/* Price */}
+          <div>
+            <label className={labelClass}>Price (Rp)</label>
+
+            <input
+              type="number"
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </div>
+
+          {/* Expired Date */}
+          <div>
+            <label className={labelClass}>Expired Date</label>
+
+            <input
+              type="date"
+              name="expired_date"
+              value={form.expired_date ? form.expired_date.split("T")[0] : ""}
+              onChange={handleChange}
+              className={inputClass}
+            />
+          </div>
+
+          {/* Description */}
+          <div className="md:col-span-2">
+            <label className={labelClass}>Description</label>
+
+            <textarea
+              rows={4}
+              name="description"
+              value={form.description ?? ""}
+              onChange={handleChange}
+              placeholder="Medicine description..."
+              className="
+                w-full
+                rounded-xl
+                border
+                border-slate-300
+                px-4
+                py-3
+                text-slate-900
+                resize-none
+                outline-none
+                transition
+                focus:border-blue-500
+                focus:ring-4
+                focus:ring-blue-100
+              "
+            />
+          </div>
+
+          {/* Footer */}
+          <div
+            className="
+              md:col-span-2
+              flex
+              justify-end
+              gap-3
+              border-t
+              border-slate-200
+              pt-6
+              mt-2
+            "
           >
-            <option value="GENERIC">GENERIC</option>
-
-            <option value="NON_GENERIC">NON GENERIC</option>
-          </select>
-
-          <input
-            type="number"
-            name="stock"
-            placeholder="Stock"
-            value={form.stock}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
-          />
-
-          <input
-            type="number"
-            name="minimum_stock"
-            placeholder="Minimum Stock"
-            value={form.minimum_stock}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
-          />
-
-          <input
-            type="number"
-            name="price"
-            placeholder="Harga"
-            value={form.price}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
-          />
-
-          <input
-            type="date"
-            name="expired_date"
-            value={form.expired_date?.split("T")[0]}
-            onChange={handleChange}
-            className="border rounded-lg p-2 text-black"
-          />
-
-          <textarea
-            name="description"
-            placeholder="Deskripsi"
-            value={form.description}
-            onChange={handleChange}
-            className="border rounded-lg p-2 col-span-2 text-black"
-          />
-
-          <div className="col-span-2 flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="border px-4 py-2 rounded-lg"
+              className="
+                rounded-xl
+                border
+                border-slate-300
+                px-5
+                py-3
+                font-medium
+                text-slate-700
+                transition
+                hover:bg-slate-100
+              "
             >
-              Batal
+              Cancel
             </button>
 
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+              className="
+                rounded-xl
+                bg-blue-600
+                px-5
+                py-3
+                font-medium
+                text-white
+                transition
+                hover:bg-blue-700
+                disabled:opacity-50
+              "
             >
-              {loading ? "Menyimpan..." : "Simpan"}
+              {loading
+                ? "Saving..."
+                : initialData
+                  ? "Update Medicine"
+                  : "Save Medicine"}
             </button>
           </div>
         </form>

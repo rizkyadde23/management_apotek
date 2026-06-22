@@ -13,25 +13,18 @@ export default function Sidebar() {
 
   return (
     <aside className="flex h-screen w-72 flex-col border-r border-slate-800 bg-slate-900">
-
       {/* Header */}
       <SidebarHeader />
 
       {/* Menu */}
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-
         {sidebarSections.map((section) => (
-          <SidebarSection
-            key={section.title}
-            section={section}
-          />
+          <SidebarSection key={section.title} section={section} />
         ))}
-
       </div>
 
       {/* Footer */}
       <div className="border-t border-slate-800 p-4">
-
         <button
           onClick={logout}
           className="
@@ -51,14 +44,9 @@ export default function Sidebar() {
         >
           <LogOut size={20} />
 
-          <span className="font-medium">
-            Logout
-          </span>
-
+          <span className="font-medium">Logout</span>
         </button>
-
       </div>
-
     </aside>
   );
 }

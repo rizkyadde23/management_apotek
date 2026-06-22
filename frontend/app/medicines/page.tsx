@@ -6,6 +6,15 @@ import { api } from "@/lib/api";
 
 import { Medicine } from "@/types/medicine";
 
+import { Plus } from "lucide-react";
+
+import PageHeader from "@/components/ui/PageHeader";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SearchBar from "@/components/ui/SearchBar";
+import MedicineStats from "@/components/medicines/MedicineStats";
+import MedicineTable from "@/components/medicines/MedicineTable";
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
 import MedicineFormModal from "@/components/medicines/MedicineFormModal";
 import DeleteMedicineModal from "@/components/medicines/DeleteMedicineModal";
 
@@ -93,110 +102,66 @@ export default function MedicinesPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-slate-900">Medicines</h1>
+    <div className="flex h-screen bg-slate-50">
+      <Sidebar />
 
-        <button
-          onClick={() => {
-            setSelectedMedicine(null);
-            setOpenForm(true);
-          }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-        >
-          + Tambah Obat
-        </button>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
+
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-5">
+            <PageHeader
+              title="Medicines"
+              description="Manage all medicines available in your pharmacy."
+              action={
+                <PrimaryButton
+                  onClick={() => {
+                    setSelectedMedicine(null);
+                    setOpenForm(true);
+                  }}
+                >
+                  <Plus size={18} className="mr-2" />
+                  Add Medicine
+                </PrimaryButton>
+              }
+            />
+
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search medicine..."
+            />
+
+            <MedicineStats medicines={medicines} />
+
+            <MedicineTable
+              medicines={filteredMedicines}
+              onEdit={(medicine) => {
+                setSelectedMedicine(medicine);
+                setOpenForm(true);
+              }}
+              onDelete={(medicine) => {
+                setSelectedMedicine(medicine);
+                setOpenDelete(true);
+              }}
+            />
+
+            <MedicineFormModal
+              open={openForm}
+              onClose={() => setOpenForm(false)}
+              onSubmit={selectedMedicine ? handleUpdate : handleCreate}
+              initialData={selectedMedicine || undefined}
+            />
+
+            <DeleteMedicineModal
+              open={openDelete}
+              medicineName={selectedMedicine?.name || ""}
+              onClose={() => setOpenDelete(false)}
+              onConfirm={handleDelete}
+            />
+          </div>
+        </main>
       </div>
-
-      <input
-        type="text"
-        placeholder="Cari obat..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="border rounded-lg p-2 w-full text-black"
-      />
-
-      <div className="bg-white rounded-xl border overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 text-left">Nama</th>
-
-              <th className="p-3 text-left">Kategori</th>
-
-              <th className="p-3 text-left">Supplier</th>
-
-              <th className="p-3 text-left">Stock</th>
-
-              <th className="p-3 text-left">Harga</th>
-
-              <th className="p-3 text-left">Expired</th>
-
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredMedicines.map((medicine) => (
-              <tr key={medicine.id} className="border-t">
-                <td className="p-3">{medicine.name}</td>
-
-                <td className="p-3">{medicine.category?.name}</td>
-
-                <td className="p-3">{medicine.supplier?.name}</td>
-
-                <td className="p-3">{medicine.stock}</td>
-
-                <td className="p-3">
-                  Rp {Number(medicine.price).toLocaleString("id-ID")}
-                </td>
-
-                <td className="p-3">
-                  {new Date(medicine.expired_date).toLocaleDateString("id-ID")}
-                </td>
-
-                <td className="p-3">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setSelectedMedicine(medicine);
-                        setOpenForm(true);
-                      }}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setSelectedMedicine(medicine);
-                        setOpenDelete(true);
-                      }}
-                      className="bg-red-600 text-white px-3 py-1 rounded"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <MedicineFormModal
-        open={openForm}
-        onClose={() => setOpenForm(false)}
-        onSubmit={selectedMedicine ? handleUpdate : handleCreate}
-        initialData={selectedMedicine || undefined}
-      />
-
-      <DeleteMedicineModal
-        open={openDelete}
-        medicineName={selectedMedicine?.name || ""}
-        onClose={() => setOpenDelete(false)}
-        onConfirm={handleDelete}
-      />
     </div>
   );
 }

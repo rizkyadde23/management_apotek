@@ -25,11 +25,9 @@ export default function Navbar() {
       <NavbarGreeting />
 
       <div className="flex items-center gap-4">
-
         <NavbarNotification />
 
         <NavbarProfile />
-
       </div>
     </header>
   );

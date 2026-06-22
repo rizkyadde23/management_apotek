@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import StatCard from "@/components/dashboard/StatCard";
+import StatCard from "@/components/ui/StatCard";
 import { getDashboard } from "@/lib/api/dashboard";
 
 import { DashboardData } from "@/types/dashboard";
