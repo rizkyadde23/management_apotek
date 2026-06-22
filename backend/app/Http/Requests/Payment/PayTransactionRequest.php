@@ -23,7 +23,7 @@ class PayTransactionRequest extends FormRequest
 
             'payment_method' => [
                 'required',
-                'in:CASH,QRIS,TRANSFER'
+                'in:CASH,QRIS,TRANSFER,E_WALLET'
             ]
         ];
     }

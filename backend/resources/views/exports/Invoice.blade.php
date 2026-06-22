@@ -92,7 +92,7 @@
         </tr>
         <tr>
             <td>Metode</td>
-            <td>: {{ $transaction->payment_method ?? 'CASH' }}</td>
+            <td>: {{ str_replace('_', '-', $transaction->payment->payment_method ?? 'CASH') }}</td>
         </tr>
     </table>
 
