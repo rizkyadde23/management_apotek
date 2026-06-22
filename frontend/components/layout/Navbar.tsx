@@ -1,43 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-interface User {
-  name: string;
-  email: string;
-
-  role?: {
-    name: string;
-  };
-}
+import NavbarGreeting from "./navbar/NavbarGreeting";
+import NavbarNotification from "./navbar/NavbarNotification";
+import NavbarProfile from "./navbar/NavbarProfile";
 
 export default function Navbar() {
-  const [user, setUser] =
-    useState<User | null>(null);
-
-  useEffect(() => {
-    const saved =
-      localStorage.getItem("auth_user");
-
-    if (saved) {
-      setUser(JSON.parse(saved));
-    }
-  }, []);
-
   return (
-    <header className="bg-white border-b px-6 h-16 flex items-center justify-between">
-      <h1 className="font-bold text-lg">
-        Management Apotek
-      </h1>
+    <header
+      className="
+      sticky
+      top-0
+      z-30
+      flex
+      items-center
+      justify-between
+      border-b
+      border-slate-200
+      bg-white
+      px-8
+      py-5
+      shadow-sm
+      "
+    >
+      <NavbarGreeting />
 
-      <div className="text-right">
-        <p className="font-medium">
-          {user?.name}
-        </p>
+      <div className="flex items-center gap-4">
 
-        <p className="text-sm text-gray-500">
-          {user?.role?.name}
-        </p>
+        <NavbarNotification />
+
+        <NavbarProfile />
+
       </div>
     </header>
   );
