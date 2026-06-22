@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import Badge from "@/components/ui/Badge";
 
 import {
   getLowStock,
@@ -10,6 +14,8 @@ import {
 
 export default function LowStockPage() {
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
 
   const [lowStocks, setLowStocks] = useState<any[]>([]);
 
@@ -25,6 +31,8 @@ export default function LowStockPage() {
 
   async function loadData() {
     try {
+      setLoading(true);
+
       const lowStockData = await getLowStock();
 
       const outStockData = await getOutOfStock();
@@ -43,138 +51,288 @@ export default function LowStockPage() {
     }
   }
 
+  const filteredLowStocks = useMemo(() => {
+    return lowStocks.filter(
+      (medicine) =>
+        medicine.name.toLowerCase().includes(search.toLowerCase()) ||
+        medicine.code.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [lowStocks, search]);
+
+  const filteredOutStocks = useMemo(() => {
+    return outStocks.filter(
+      (medicine) =>
+        medicine.name.toLowerCase().includes(search.toLowerCase()) ||
+        medicine.code.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [outStocks, search]);
+
   if (loading) {
-    return <div className="p-5">Loading...</div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col">
+          <Navbar />
+
+          <div className="p-6">Loading Medicines...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-black">Monitoring Stok</h1>
+    <div className="flex h-screen bg-slate-50">
+      <Sidebar />
 
-      {/* SUMMARY */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white border rounded-xl p-5">
-          <h3 className="text-slate-500">Low Stock</h3>
+        <main className="flex-1 overflow-y-auto p-8">
+          <div className="space-y-6">
+            {/* Header */}
 
-          <p className="text-3xl font-bold text-orange-600">
-            {summary.low_stock_count}
-          </p>
-        </div>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">
+                Monitoring Stok
+              </h1>
 
-        <div className="bg-white border rounded-xl p-5">
-          <h3 className="text-slate-500">Out Of Stock</h3>
+              <p className="mt-1 text-slate-500">
+                Pantau obat yang hampir habis dan stok kosong.
+              </p>
+            </div>
 
-          <p className="text-3xl font-bold text-red-600">{outStocks.length}</p>
-        </div>
-      </div>
+            {/* Summary */}
 
-      {/* LOW STOCK */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div
+                className="
+                  rounded-2xl
+                  border
+                  border-slate-200
+                  bg-white
+                  p-6
+                  shadow-sm
+                "
+              >
+                <p className="text-sm text-slate-500">Low Stock Medicines</p>
 
-      <div className="bg-white border rounded-xl overflow-hidden">
-        <div className="p-4 border-b">
-          <h2 className="font-bold text-lg text-black">Low Stock Medicines</h2>
-        </div>
+                <h3 className="mt-2 text-4xl font-bold text-orange-600">
+                  {summary.low_stock_count}
+                </h3>
+              </div>
 
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 border">Kode</th>
+              <div
+                className="
+                  rounded-2xl
+                  border
+                  border-slate-200
+                  bg-white
+                  p-6
+                  shadow-sm
+                "
+              >
+                <p className="text-sm text-slate-500">Out Of Stock Medicines</p>
 
-              <th className="p-3 border">Nama Obat</th>
+                <h3 className="mt-2 text-4xl font-bold text-red-600">
+                  {outStocks.length}
+                </h3>
+              </div>
+            </div>
 
-              <th className="p-3 border">Stock</th>
+            {/* Search */}
 
-              <th className="p-3 border">Minimum</th>
+            <div>
+              <input
+                type="text"
+                placeholder="Cari obat berdasarkan kode atau nama..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="
+                  w-full
+                  rounded-xl
+                  border
+                  border-slate-300
+                  bg-white
+                  px-4
+                  py-3
+                  text-black
+                  outline-none
+                  transition
+                  focus:border-blue-500
+                  focus:ring-4
+                  focus:ring-blue-100
+                "
+              />
+            </div>
 
-              <th className="p-3 border">Status</th>
-            </tr>
-          </thead>
+            {/* Low Stock */}
 
-          <tbody>
-            {lowStocks.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="p-6 text-center text-slate-500">
-                  Tidak ada data low stock
-                </td>
-              </tr>
-            ) : (
-              lowStocks.map((medicine: any) => (
-                <tr key={medicine.id}>
-                  <td className="border p-3 text-black">{medicine.code}</td>
+            <div
+              className="
+                overflow-hidden
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                shadow-sm
+              "
+            >
+              <div className="border-b border-slate-200 px-6 py-4">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Low Stock Medicines
+                </h2>
+              </div>
 
-                  <td className="border p-3 text-black">{medicine.name}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Kode
+                      </th>
 
-                  <td className="border p-3 text-orange-600 font-semibold">
-                    {medicine.stock}
-                  </td>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Nama Obat
+                      </th>
 
-                  <td className="border p-3 text-black">
-                    {medicine.minimum_stock}
-                  </td>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Stock
+                      </th>
 
-                  <td className="border p-3">
-                    <span className="px-2 py-1 rounded bg-orange-100 text-orange-700 text-xs">
-                      LOW STOCK
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Minimum
+                      </th>
 
-      {/* OUT OF STOCK */}
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
 
-      <div className="bg-white border rounded-xl overflow-hidden">
-        <div className="p-4 border-b">
-          <h2 className="font-bold text-lg text-black">
-            Out Of Stock Medicines
-          </h2>
-        </div>
+                  <tbody>
+                    {filteredLowStocks.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-6 py-10 text-center text-slate-500"
+                        >
+                          Tidak ada data low stock.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredLowStocks.map((medicine) => (
+                        <tr
+                          key={medicine.id}
+                          className="border-t border-slate-100"
+                        >
+                          <td className="px-6 py-4 text-black">
+                            {medicine.code}
+                          </td>
 
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 border">Kode</th>
+                          <td className="px-6 py-4 text-black">
+                            {medicine.name}
+                          </td>
 
-              <th className="p-3 border">Nama Obat</th>
+                          <td className="px-6 py-4 font-semibold text-orange-600">
+                            {medicine.stock}
+                          </td>
 
-              <th className="p-3 border">Stock</th>
+                          <td className="px-6 py-4 text-black">
+                            {medicine.minimum_stock}
+                          </td>
 
-              <th className="p-3 border">Status</th>
-            </tr>
-          </thead>
+                          <td className="px-6 py-4">
+                            <Badge color="yellow">LOW STOCK</Badge>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-          <tbody>
-            {outStocks.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="p-6 text-center text-slate-500">
-                  Tidak ada data out of stock
-                </td>
-              </tr>
-            ) : (
-              outStocks.map((medicine: any) => (
-                <tr key={medicine.id}>
-                  <td className="border p-3 text-black">{medicine.code}</td>
+            {/* Out Of Stock */}
 
-                  <td className="border p-3 text-black">{medicine.name}</td>
+            <div
+              className="
+                overflow-hidden
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                shadow-sm
+              "
+            >
+              <div className="border-b border-slate-200 px-6 py-4">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Out Of Stock Medicines
+                </h2>
+              </div>
 
-                  <td className="border p-3 text-red-600 font-bold">
-                    {medicine.stock}
-                  </td>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Kode
+                      </th>
 
-                  <td className="border p-3">
-                    <span className="px-2 py-1 rounded bg-red-100 text-red-700 text-xs">
-                      OUT OF STOCK
-                    </span>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Nama Obat
+                      </th>
+
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Stock
+                      </th>
+
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredOutStocks.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="px-6 py-10 text-center text-slate-500"
+                        >
+                          Tidak ada data out of stock.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredOutStocks.map((medicine) => (
+                        <tr
+                          key={medicine.id}
+                          className="border-t border-slate-100"
+                        >
+                          <td className="px-6 py-4 text-black">
+                            {medicine.code}
+                          </td>
+
+                          <td className="px-6 py-4 text-black">
+                            {medicine.name}
+                          </td>
+
+                          <td className="px-6 py-4 font-bold text-red-600">
+                            {medicine.stock}
+                          </td>
+
+                          <td className="px-6 py-4">
+                            <Badge color="red">OUT OF STOCK</Badge>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
