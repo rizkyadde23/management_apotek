@@ -41,4 +41,31 @@ class LowStockRepository
             ->where('stock', 0)
             ->paginate(10);
     }
+
+    public function dashboard()
+    {
+        return Medicine::select(
+
+                'id',
+
+                'name',
+
+                'stock',
+
+                'minimum_stock'
+
+            )
+
+            ->whereColumn(
+                'stock',
+                '<=',
+                'minimum_stock'
+            )
+
+            ->orderBy('stock')
+
+            ->limit(5)
+
+            ->get();
+    }
 }

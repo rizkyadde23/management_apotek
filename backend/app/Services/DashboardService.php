@@ -53,6 +53,22 @@ class DashboardService
                 'today_transactions' =>
                     $this->dashboardRepository
                         ->todayTransaction(),
+
+                'low_stock_table' =>
+                    $this->lowStockRepository
+                        ->dashboard(),
+
+                'expired_table' =>
+                    $this->expiredRepository
+                        ->dashboard(),
+
+                'recent_transactions' =>
+                    $this->dashboardRepository
+                        ->recentTransactions(),
+
+                'recent_notifications' =>
+                    $this->dashboardRepository
+                        ->recentNotifications(),
             ],
 
             /*

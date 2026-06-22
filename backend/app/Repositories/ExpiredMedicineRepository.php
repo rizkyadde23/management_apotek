@@ -66,4 +66,37 @@ class ExpiredMedicineRepository
             ]
         )->count();
     }
+
+    public function dashboard()
+    {
+        return Medicine::select(
+
+                'id',
+
+                'name',
+
+                'expired_date'
+
+            )
+
+            ->whereBetween(
+
+                'expired_date',
+
+                [
+
+                    now(),
+
+                    now()->addDays(30)
+
+                ]
+
+            )
+
+            ->orderBy('expired_date')
+
+            ->limit(5)
+
+            ->get();
+    }
 }

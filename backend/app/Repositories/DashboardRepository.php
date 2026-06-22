@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Medicine;
 use App\Models\Supplier;
 use App\Models\Transaction;
+use App\Models\Notification;
 use Illuminate\Support\Facades\DB;
 
 class DashboardRepository
@@ -169,5 +170,37 @@ public function paymentChart()
         ->groupBy('payment_status')
 
         ->get();
+}
+
+public function recentTransactions()
+{
+    return Transaction::with('user')
+
+        ->latest()
+
+        ->limit(5)
+
+        ->get([
+            'id',
+            'transaction_code',
+            'user_id',
+            'total',
+            'payment_status',
+            'created_at'
+        ]);
+}
+
+public function recentNotifications()
+{
+    return Notification::latest()
+
+        ->limit(5)
+
+        ->get([
+            'id',
+            'title',
+            'message',
+            'created_at'
+        ]);
 }
 }
