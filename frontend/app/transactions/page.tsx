@@ -7,6 +7,12 @@ import { getTransactions } from "@/lib/api/transactions";
 import { Transaction } from "@/types/transaction";
 
 import TransactionDetailModal from "@/components/transactions/TransactionDetailModal";
+import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import PageHeader from "@/components/ui/PageHeader";
+import SearchBar from "@/components/ui/SearchBar";
+import TransactionStats from "@/components/transactions/TransactionStats";
+import TransactionTable from "@/components/transactions/TransactionTable";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -17,6 +23,16 @@ export default function TransactionsPage() {
     useState<Transaction | null>(null);
 
   const [openDetail, setOpenDetail] = useState(false);
+
+  const [search, setSearch] = useState("");
+
+  const filteredTransactions = transactions.filter(
+    (transaction) =>
+      transaction.transaction_code
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      transaction.user?.name?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   useEffect(() => {
     loadData();
@@ -35,76 +51,58 @@ export default function TransactionsPage() {
   }
 
   if (loading) {
-    return <div className="p-6">Loading...</div>;
+    return (
+      <div className="flex h-screen bg-slate-50">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col">
+          <Navbar />
+
+          <div className="p-6">Loading suppliers...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-black">Transactions</h1>
+    <div className="flex h-screen bg-slate-100">
+      <Sidebar />
 
-      <div className="bg-white rounded-xl border overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-100">
-              <th className="p-3 text-left">Kode</th>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Navbar />
 
-              <th className="p-3 text-left">Kasir</th>
+        <main className="flex-1 overflow-y-auto p-8">
+          <div className="space-y-6">
+            <PageHeader
+              title="Transactions"
+              description="Manage pharmacy sales transactions."
+            />
 
-              <th className="p-3 text-left">Total</th>
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search transaction..."
+            />
 
-              <th className="p-3 text-left">Status</th>
+            <TransactionStats transactions={filteredTransactions} />
 
-              <th className="p-3 text-left">Tanggal</th>
+            <TransactionTable
+              transactions={filteredTransactions}
+              onDetail={(transaction) => {
+                setSelectedTransaction(transaction);
 
-              <th className="p-3 text-left">Action</th>
-            </tr>
-          </thead>
+                setOpenDetail(true);
+              }}
+            />
+          </div>
+        </main>
 
-          <tbody>
-            {transactions.map((transaction) => (
-              <tr key={transaction.id} className="border-t">
-                <td className="p-3 text-black">
-                  {transaction.transaction_code}
-                </td>
-
-                <td className="p-3 text-black">{transaction.user?.name}</td>
-
-                <td className="p-3 text-black">
-                  Rp {Number(transaction.total).toLocaleString("id-ID")}
-                </td>
-
-                <td className="p-3">
-                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded">
-                    {transaction.payment_status}
-                  </span>
-                </td>
-
-                <td className="p-3 text-black">
-                  {new Date(transaction.created_at).toLocaleDateString("id-ID")}
-                </td>
-
-                <td className="p-3">
-                  <button
-                    onClick={() => {
-                      setSelectedTransaction(transaction);
-
-                      setOpenDetail(true);
-                    }}
-                    className="bg-blue-600 text-white px-3 py-1 rounded"
-                  >
-                    Detail
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TransactionDetailModal
+          open={openDetail}
+          transaction={selectedTransaction}
+          onClose={() => setOpenDetail(false)}
+        />
       </div>
-      <TransactionDetailModal
-        open={openDetail}
-        transaction={selectedTransaction}
-        onClose={() => setOpenDetail(false)}
-      />
     </div>
   );
 }
