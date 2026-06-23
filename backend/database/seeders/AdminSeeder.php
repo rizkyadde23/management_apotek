@@ -11,13 +11,13 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        //$role = Role::where('name', 'ADMIN')->first();
+        $role = Role::where('name', 'ADMIN')->first();
 
-        // User::create([
-        //     'role_id' => $role->id,
-        //     'name' => 'Administrator',
-        //     'email' => 'admin@pharmacy.test',
-        //     'password' => Hash::make('password'),
-        // ]);
+        User::create([
+            'role_id' => $role->id,
+            'name' => 'Administrator',
+            'email' => 'admin@pharmacy.test',
+            'password' => Hash::make('password'),
+        ]);
     }
 }
