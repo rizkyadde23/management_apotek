@@ -61,24 +61,23 @@ class DashboardRepository
     public function salesChart()
 {
     return Transaction::select(
-            DB::raw("MONTH(created_at) as month"),
+            // Menggunakan strftime('%m') untuk mengambil angka bulan (01-12) di SQLite
+            DB::raw("cast(strftime('%m', created_at) as integer) as month"),
             DB::raw("SUM(total) as total")
         )
-        ->whereYear(
-            'created_at',
-            now()->year
-        )
+        // Memastikan hanya mengambil transaksi di tahun berjalan (2026) menggunakan standar SQLite
+        ->whereRaw("strftime('%Y', created_at) = ?", [now()->year])
         ->where(
             'payment_status',
             'PAID'
         )
-        ->groupBy(DB::raw("MONTH(created_at)"))
-        ->orderBy(DB::raw("MONTH(created_at)"))
+        // Group dan Order disesuaikan dengan alias 'month' yang baru
+        ->groupBy(DB::raw("strftime('%m', created_at)"))
+        ->orderBy(DB::raw("strftime('%m', created_at)"), 'asc')
         ->get()
         ->map(function ($item) {
-
             return [
-
+                // Mengonversi angka bulan menjadi nama singkat (Jan, Feb, Mar, dll.)
                 'month' => date(
                     'M',
                     mktime(
@@ -89,11 +88,8 @@ class DashboardRepository
                         1
                     )
                 ),
-
                 'total' => (float) $item->total
-
             ];
-
         });
 }
 
