@@ -15,10 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        if (User::count() == 0) {
+            // Contoh jika memanggil seeder lain:
+            $this->call([AdminSeeder::class,]);
+        }
         $this->call([
             RoleSeeder::class,
-            AdminSeeder::class,
             MedicineCategorySeeder::class,
             SupplierSeeder::class,
             MedicineSeeder::class,
