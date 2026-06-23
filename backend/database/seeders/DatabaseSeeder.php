@@ -15,22 +15,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // SEMUA seeder dimasukkan ke dalam kondisi ini.
+        // Jika sudah ada minimal 1 user di database, proses seeding akan dilewati sepenuhnya.
         if (User::count() == 0) {
-            // Contoh jika memanggil seeder lain:
-            $this->call([AdminSeeder::class,]);
+            $this->call([
+                RoleSeeder::class, // Diatur ke urutan pertama jika AdminSeeder membutuhkan data Role
+                AdminSeeder::class, 
+                MedicineCategorySeeder::class,
+                SupplierSeeder::class,
+                MedicineSeeder::class,
+                PreOrderSeeder::class,
+                TransactionSeeder::class,
+                TransactionDetailSeeder::class,
+                PaymentSeeder::class,
+                NotificationSeeder::class,
+                PurchaseOrderSeeder::class,
+                NotificationSettingSeeder::class,
+            ]);
         }
-        $this->call([
-            RoleSeeder::class,
-            MedicineCategorySeeder::class,
-            SupplierSeeder::class,
-            MedicineSeeder::class,
-            PreOrderSeeder::class,
-            TransactionSeeder::class,
-            TransactionDetailSeeder::class,
-            PaymentSeeder::class,
-            NotificationSeeder::class,
-            PurchaseOrderSeeder::class,
-            NotificationSettingSeeder::class,
-        ]);
     }
 }
