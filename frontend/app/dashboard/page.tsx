@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// PENTING: Tambahkan import useRouter untuk mengalihkan halaman
 import { useRouter } from "next/navigation";
 
 import StatCard from "@/components/ui/StatCard";
-// Pastikan path ini benar sesuai struktur proyekmu
 import { getDashboard } from "@/lib/api/dashboard";
 import { DashboardData } from "@/types/dashboard";
 
@@ -19,29 +17,28 @@ import RecentTransactionTable from "@/components/dashboard/RecentTransactionTabl
 import RecentNotificationTable from "@/components/dashboard/RecentNotificationTable";
 
 export default function DashboardPage() {
-  const router = useRouter(); // Inisialisasi router Next.js
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
+
+  // 1. KUNCI UTAMA: Default state loading HARUS true
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Ambil token dari localStorage saat halaman dimuat di browser
     const token = localStorage.getItem("auth_token");
 
     if (!token) {
-      // Jika token TIDAK ADA, langsung tendang ke halaman login
-      router.push("/login");
+      // Jika tidak ada token, langsung tendang ke login dan JANGAN ubah loading ke false
+      router.replace("/login");
     } else {
-      // Jika token ADA, baru panggil API dashboard
       getDashboard()
         .then((res) => {
           setData(res);
-          setLoading(false);
+          setLoading(false); // Hanya matikan loading jika data sukses diambil
         })
         .catch((err) => {
-          // Jika API membalas 401 (Token Expired / dihapus dari database Laravel)
           if (err.response?.status === 401) {
-            localStorage.removeItem("auth_token"); // Bersihkan token rusak
-            router.push("/login"); // Tendang kembali ke login
+            localStorage.removeItem("auth_token");
+            router.replace("/login");
           } else {
             console.error("Gagal memuat data dashboard:", err);
             setLoading(false);
@@ -50,24 +47,30 @@ export default function DashboardPage() {
     }
   }, [router]);
 
-  // Tampilan state loading saat validasi token dan fetch data sedang berjalan
+  // 2. KUNCI KEDUA: Selama loading masih true, potong kompas di sini.
+  // Kode HTML dashboard di bawah sama sekali tidak akan sempat dieksekusi atau diintip browser.
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center text-slate-700 font-medium">
-        Memeriksa Autentikasi & Memuat Dashboard...
+      <div className="flex h-screen items-center justify-center bg-slate-50 text-slate-700 font-medium">
+        <div className="flex flex-col items-center gap-2">
+          {/* Kamu bisa ganti ini dengan spinner loading andalanmu */}
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-700"></div>
+          <p>Memeriksa Autentikasi...</p>
+        </div>
       </div>
     );
   }
 
-  // Jika proses selesai tapi data tetap kosong
+  // Jika token lolos tapi data bermasalah
   if (!data) {
     return (
       <div className="flex h-screen items-center justify-center text-red-500 font-medium">
-        Dashboard gagal dimuat. Sesi Anda mungkin telah berakhir.
+        Sesi Anda berakhir, silakan login kembali.
       </div>
     );
   }
 
+  // 3. Hanya dirender jika loading = false (artinya user terbukti punya token valid)
   return (
     <div>
       <div className="mb-8">
